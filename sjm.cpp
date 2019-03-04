@@ -1,6 +1,5 @@
 #include "sjm.h"
 #include "util.h"
-#include "ThreadPool.h"
 
 // prepare output sub directories
 void sjm::gen_dir(const sjm::args& a){
@@ -186,6 +185,82 @@ void sjm::gen_fusion_job(const sjm::args& a, const std::string& lib1, const std:
 // generate report job
 void sjm::gen_report_job(const sjm::args& a, const std::string& lib){
 }
+// generate prelib task
+void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
+    std::ifstream fr(a.sample_list);
+    std::string sample_no, flow_cell, lib_name, read1, read2, barcode_conf, tmp_str;
+    std::getline(fr, tmp_str);
+    std::istringstream iss;
+    int count = 0;
+    while(std::getline(fr, tmp_str)){
+        iss.clear();
+        iss.str(tmp_str);
+        iss >> sample_no >> flow_cell >> lib_name >> read1 >> read2 >> barcode_conf;
+        sjm::job jfastp, jsplitr;
+        sjm::gen_fastp_job(a, read1, read2, jfastp);
+        sjm::gen_splitr_job(a, jfastp.o1, jfastp.o2, barcode_conf, jsplitr);
+        sjm::task t;
+        t.joblist.resize(2);
+        t.joblist[0].push_back(jfastp);
+        t.joblist[1].push_back(jsplitr);
+        std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.sjm");
+        p.pipelist[count][0].push_back(a.bin_dir + "/sjm -i " + sjmfile);
+        ++p.njob[0];
+        ++count;
+        std::ofstream fw(sjmfile);
+        fw << t;
+        fw.close();
+    }
+    fr.close();
+}
+
+// generate analib task
+void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
+    std::ifstream fr1(a.sample_list);
+    std::string sample_no, flow_cell, lib_name, read1, read2, barcode_conf;
+    std::string sublib, subr1, subr2, tmp_str;
+    std::getline(fr1, tmp_str);
+    std::istringstream iss1, iss2;
+    int count = 0;
+    while(std::getline(fr1, tmp_str)){
+        iss1.clear();
+        iss1.str(tmp_str);
+        iss1 >> sample_no >> flow_cell >> lib_name >> read1 >> read2 >> barcode_conf;
+        std::ifstream fr2(barcode_conf);
+        while(std::getline(fr2, tmp_str)){
+            iss2.clear();
+            iss2.str(tmp_str);
+            iss2 >> sublib;
+            subr1 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R1.fq";
+            subr2 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R2.fq";
+            sjm::job jfiltdb, jseqtk, jaln, jmkdup, jbamqc, jfusion;
+            sjm::gen_filtdb_job(a, subr1, subr2, jfiltdb);
+            sjm::gen_seqtk_job(a, jfiltdb.o1, jfiltdb.o2, jseqtk);
+            sjm::gen_align_job(a, jseqtk.o1, jseqtk.o2, sublib, jaln);
+            sjm::gen_mkdup_job(a, jaln.o1, sublib, jmkdup);
+            sjm::gen_bamqc_job(a, jmkdup.o1, sublib, jbamqc);
+            sjm::gen_fusion_job(a, jseqtk.o1, jseqtk.o2, sublib, jfusion);
+            sjm::task t;
+            t.joblist.resize(6);
+            t.joblist[0].push_back(jfiltdb);
+            t.joblist[1].push_back(jseqtk);
+            t.joblist[2].push_back(jaln);
+            t.joblist[2].push_back(jfusion);
+            t.joblist[3].push_back(jmkdup);
+            t.joblist[4].push_back(jbamqc);
+            std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.sjm");
+            p.pipelist[count][1].push_back(a.bin_dir + "/sjm -i " + sjmfile);
+            ++p.njob[1];
+            std::ofstream fw(sjmfile);
+            fw << t;
+            fw.close();
+        }
+        ++count;
+        fr2.close();
+    }
+    fr1.close();
+}
+
 
 // initialize pipeline
 void sjm::init_pipeline(const sjm::args& a, sjm::pipeline& p){
@@ -245,77 +320,4 @@ int sjm::pipeline::run_pipe(){
         }
     }
     return fret;
-}
-
-// generate prelib task
-void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
-    std::ifstream fr(a.sample_list);
-    std::string sample_no, flow_cell, lib_name, read1, read2, barcode_conf, tmp_str;
-    std::getline(fr, tmp_str);
-    std::istringstream iss;
-    int count = 0;
-    while(std::getline(fr, tmp_str)){
-        iss.str(tmp_str);
-        iss >> sample_no >> flow_cell >> lib_name >> read1 >> read2 >> barcode_conf;
-        sjm::job jfastp, jsplitr;
-        sjm::gen_fastp_job(a, read1, read2, jfastp);
-        sjm::gen_splitr_job(a, jfastp.o1, jfastp.o2, barcode_conf, jsplitr);
-        sjm::task t;
-        t.joblist.resize(2);
-        t.joblist[0].push_back(jfastp);
-        t.joblist[1].push_back(jsplitr);
-        std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.sjm");
-        p.pipelist[count][0].push_back(a.bin_dir + "/sjm " + sjmfile);
-        ++p.njob[0];
-        ++count;
-        std::ofstream fw(sjmfile);
-        fw << t;
-        fw.close();
-    }
-    fr.close();
-}
-
-// generate analib task
-void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
-    std::ifstream fr1(a.sample_list);
-    std::string sample_no, flow_cell, lib_name, read1, read2, barcode_conf;
-    std::string sublib, subr1, subr2, tmp_str;
-    std::getline(fr1, tmp_str);
-    std::istringstream iss1, iss2;
-    int count = 0;
-    while(std::getline(fr1, tmp_str)){
-        iss1.str(tmp_str);
-        iss1 >> sample_no >> flow_cell >> lib_name >> read1 >> read2 >> barcode_conf;
-        std::ifstream fr2(barcode_conf);
-        while(std::getline(fr2, tmp_str)){
-            iss2.str(tmp_str);
-            iss2 >> sublib;
-            subr1 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R1.fq";
-            subr2 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R2.fq";
-            sjm::job jfiltdb, jseqtk, jaln, jmkdup, jbamqc, jfusion;
-            sjm::gen_filtdb_job(a, subr1, subr2, jfiltdb);
-            sjm::gen_seqtk_job(a, jfiltdb.o1, jfiltdb.o2, jseqtk);
-            sjm::gen_align_job(a, jseqtk.o1, jseqtk.o2, sublib, jaln);
-            sjm::gen_mkdup_job(a, jaln.o1, sublib, jmkdup);
-            sjm::gen_bamqc_job(a, jmkdup.o1, sublib, jbamqc);
-            sjm::gen_fusion_job(a, jseqtk.o1, jseqtk.o2, sublib, jfusion);
-            sjm::task t;
-            t.joblist.resize(6);
-            t.joblist[0].push_back(jfiltdb);
-            t.joblist[1].push_back(jseqtk);
-            t.joblist[2].push_back(jaln);
-            t.joblist[2].push_back(jfusion);
-            t.joblist[3].push_back(jmkdup);
-            t.joblist[4].push_back(jbamqc);
-            std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.sjm");
-            p.pipelist[count][1].push_back(a.bin_dir + "/sjm " + sjmfile);
-            ++p.njob[1];
-            std::ofstream fw(sjmfile);
-            fw << t;
-            fw.close();
-        }
-        ++count;
-        fr2.close();
-    }
-    fr1.close();
 }
