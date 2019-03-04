@@ -18,12 +18,12 @@
 #endif
 
 namespace util{
-    bool is_dir_exists(const std::string& path);
-    bool make_dirs(const std::string& path);
+    bool is_dir_exists(const std::string path);
+    bool make_dirs(const std::string path);
     std::string get_cwd(void);
-    std::string get_abspath(const std::string& path);
-    std::string get_dirname(const std::string& path);
-    std::string get_basename(const std::string& path);
+    std::string get_abspath(const std::string path);
+    std::string get_dirname(const std::string path);
+    std::string get_basename(const std::string path);
 }
 
 #endif

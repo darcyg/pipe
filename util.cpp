@@ -1,6 +1,6 @@
 #include "util.h"
 
-bool util::is_dir_exists(const std::string& path){
+bool util::is_dir_exists(const std::string path){
 #if defined(_WIN32)
     struct _stat info;
     if(_stat(path.c_str(), &info) != 0){
@@ -16,7 +16,7 @@ bool util::is_dir_exists(const std::string& path){
 #endif
 }
 
-bool util::make_dirs(const std::string& path){
+bool util::make_dirs(const std::string path){
     std::string clean_path = "";
     char las = '\0';
     for(auto& e: path){
@@ -69,7 +69,7 @@ std::string util::get_cwd(void){
     return cpath;
 }
 
-std::string util::get_dirname(const std::string& path){
+std::string util::get_dirname(const std::string path){
     char cpath[FILENAME_MAX];
     get_real_path(path.c_str(), cpath);
     std::string clean_path = std::string(cpath);
@@ -81,7 +81,7 @@ std::string util::get_dirname(const std::string& path){
     }
 }
 
-std::string util::get_basename(const std::string& path){
+std::string util::get_basename(const std::string path){
     char cpath[FILENAME_MAX];
     get_real_path(path.c_str(), cpath);
     std::string clean_path = std::string(cpath);
@@ -93,7 +93,7 @@ std::string util::get_basename(const std::string& path){
     }
 }
 
-std::string util::get_abspath(const std::string& path){
+std::string util::get_abspath(const std::string path){
     char cpath[FILENAME_MAX];
     get_real_path(path.c_str(), cpath);
     std::string abspath = std::string(cpath);
