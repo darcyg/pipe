@@ -31,7 +31,8 @@ int main(int argc, char** argv)
     prun->add_option("-s,--sample_list", a.sample_list, "sample list file")->required(true)->check(CLI::ExistingFile);
     prun->add_option("-r,--region_file", a.reg, "region bed file")->required(true)->check(CLI::ExistingFile);
     prun->add_option("-v,--reads_count", a.dfq_vol, "down sample fastq reads number");
-    prun->add_option("-o,--out_dir", a.out_dir, "output directory")->required(false);
+    prun->add_option("-o,--out_dir", a.out_dir, "output directory");
+    prun->add_flag("-c,--continue", a.rerun, "continue run from last failure");
     
     CLI_PARSE(app, argc, argv);
 
@@ -51,6 +52,9 @@ int main(int argc, char** argv)
         sjm::gen_dir(a);
         sjm::gen_prelib_task(a, p);
         sjm::gen_analib_task(a, p);
+        if(a.rerun){
+            p.pre_rerun();
+        }
         p.run_pipe();
     }else{
         return 0;

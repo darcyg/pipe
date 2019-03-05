@@ -28,6 +28,7 @@ namespace sjm{
         std::string rep_dir = "09.report";
         std::string log_dir = "log";
         std::string dfq_vol = "VOL";
+        bool rerun = false;
         bool local = false;
         std::string version = "0.0.0";
     };
@@ -123,17 +124,19 @@ namespace sjm{
         std::vector<std::vector<std::vector<std::string>>> pipelist;
         std::vector<int> njob;
         int run_pipe();
+        void pre_rerun();
     };
 
+    // generate subdirectories
     void gen_dir(const sjm::args& a);
     // generate fastp job
-    void gen_fastp_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, sjm::job& j);
+    void gen_fastp_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j);
     // generate splitr job
-    void gen_splitr_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& sconf, sjm::job& j);
+    void gen_splitr_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& sconf, const std::string& pre, sjm::job& j);
     // generate filtdb job
-    void gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, sjm::job& j);
+    void gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j);
     // downsample fq
-    void gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, sjm::job& j);
+    void gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j);
     // generate alignment job
     void gen_align_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j);
     // generate mkdup job
