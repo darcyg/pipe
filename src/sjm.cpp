@@ -1,6 +1,34 @@
 #include "sjm.h"
 #include "util.h"
 
+// show stage_marker<->ana_stage relationship
+void sjm::show_mark(){
+    std::vector<std::string> stg = {"cutadaptor by fastp", "split read by splitr", "filter rrna by filtdb",
+                                    "downsample fastq by seqtk", "genome slignment by bwa", "markdup by mkdp",
+                                    "bam QC by bamqc", "fusion calling by fusionMap", "express quant by kallisto",
+                                    "report by genrep"};
+    std::cout << std::left;
+    std::cout << std::setw(10) << "Marker" << std::setw(20) << "Analysis" << std::endl;
+    for(size_t i = 0; i < stg.size(); ++i){
+        std::cout << "--------------------------------------" << std::endl;
+        std::cout << std::setw(10) << i + 1 << std::setw(20) << stg[i] << std::endl;
+    }
+}
+
+// update args after commandline args parsed
+void sjm::update_args(sjm::args& a){
+    a.sample_list = util::get_abspath(a.sample_list);
+    a.out_dir = util::get_abspath(a.out_dir);
+    a.db_dir = util::get_dirname(a.bin_dir) + "/db/";
+    if(a.ana_marker.empty()){
+        for(int i = a.ini_marker; i <= a.end_marker; ++i){
+            a.ana_marker.push_back(i);
+        }
+    }else{
+        std::remove_if(a.ana_marker.begin(), a.ana_marker.end(), [&a](int& e){return e < a.ini_marker || e > a.end_marker;});
+    }
+}
+
 // prepare output sub directories
 void sjm::gen_dir(const sjm::args& a){
     std::string sep = "/";
@@ -13,6 +41,7 @@ void sjm::gen_dir(const sjm::args& a){
     util::make_dirs(a.out_dir + sep + a.mkd_dir);
     util::make_dirs(a.out_dir + sep + a.bqc_dir);
     util::make_dirs(a.out_dir + sep + a.fus_dir);
+    util::make_dirs(a.out_dir + sep + a.exp_dir);
     util::make_dirs(a.out_dir + sep + a.rep_dir);
     util::make_dirs(a.out_dir + sep + a.log_dir);
 }
@@ -213,6 +242,25 @@ void sjm::gen_fusion_job(const sjm::args& a, const std::string& lib1, const std:
     fw.close();
 }
 
+// generate express job
+void sjm::gen_express_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
+    j.name.second = "express";
+    j.workdir.second = a.out_dir + "/" + a.exp_dir + "/";
+    std::string sgee = j.workdir.second + pre + ".sub.e";
+    std::string sgeo = j.workdir.second + pre + ".sub.o";
+    j.cmd.second += "mkdir -p " + j.workdir.second + pre + " && ";
+    j.cmd.second += a.bin_dir + "/kallisto";
+    j.cmd.second += " quant -t 8 -i " + a.db_dir + "/ensembl/Homo_sapiens.GRCh37.cdna.all.fa.idx";
+    j.cmd.second += " -o " + j.workdir.second + pre + " ";
+    j.cmd.second += lib1 + " " + lib2;
+    j.memory.second = "4g";
+    j.slots.second = "8";
+    j.sopt.second.append(" -l p=" + j.slots.second);
+    j.sopt.second.append(" -l vf=" + j.memory.second);
+    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
+    if(a.local){j.host.second = "localhost";}
+}
+
 // generate report job
 void sjm::gen_report_job(const sjm::args& a, const std::string& lib){
 }
@@ -227,13 +275,20 @@ void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
         iss.clear();
         iss.str(tmp_str);
         iss >> sample_no >> flow_cell >> lib_name >> read1 >> read2 >> barcode_conf;
-        sjm::job jfastp, jsplitr;
+        sjm::job jfastp(1), jsplitr(2);
         sjm::gen_fastp_job(a, read1, read2, lib_name, jfastp);
         sjm::gen_splitr_job(a, jfastp.o1, jfastp.o2, barcode_conf, lib_name, jsplitr);
         sjm::task t;
         t.joblist.resize(2);
         t.joblist[0].push_back(jfastp);
         t.joblist[1].push_back(jsplitr);
+        for(auto& e: t.joblist){
+            for(auto& f: e){
+                if(std::find(a.ana_marker.cbegin(), a.ana_marker.cend(), f.stage_marker) == a.ana_marker.cend()){
+                    f.status.second = "done";
+                }
+            }
+        }
         std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.sjm");
         p.pipelist[count][0].push_back(a.bin_dir + "/sjm -i " + sjmfile);
         ++p.njob[0];
@@ -264,7 +319,7 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             iss2 >> sublib;
             subr1 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R1.fq";
             subr2 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R2.fq";
-            sjm::job jfiltdb, jseqtk, jaln, jmkdup, jbamqc, jfusion;
+            sjm::job jfiltdb(3), jseqtk(4), jaln(5), jmkdup(6), jbamqc(7), jfusion(8), jexpress(9);
             sjm::gen_filtdb_job(a, subr1, subr2, sublib, jfiltdb);
             sjm::gen_seqtk_job(a, jfiltdb.o1, jfiltdb.o2, sublib, jseqtk);
             sjm::gen_align_job(a, jseqtk.o1, jseqtk.o2, sublib, jaln);
@@ -277,8 +332,16 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             t.joblist[1].push_back(jseqtk);
             t.joblist[2].push_back(jaln);
             t.joblist[2].push_back(jfusion);
+            t.joblist[2].push_back(jexpress);
             t.joblist[3].push_back(jmkdup);
             t.joblist[4].push_back(jbamqc);
+            for(auto& e: t.joblist){
+                for(auto& f: e){
+                    if(std::find(a.ana_marker.cbegin(), a.ana_marker.cend(), f.stage_marker) == a.ana_marker.cend()){
+                        f.status.second = "done";
+                    }
+                }
+            }
             std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.sjm");
             p.pipelist[count][1].push_back(a.bin_dir + "/sjm -i " + sjmfile);
             ++p.njob[1];

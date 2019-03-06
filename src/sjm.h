@@ -7,12 +7,19 @@
 #include <ostream>
 #include <sstream>
 #include <fstream>
+#include <iomanip>
+#include <algorithm>
 
 namespace sjm{
     // sjm specific args
     struct args{
+        const int minstage = 1;
+        const int maxstage = 10;
         std::string sample_list;
         std::string reg;
+        std::vector<int> ana_marker;
+        int ini_marker = 1;
+        int end_marker = 9;
         std::string out_dir = "./";
         std::string bin_dir = "./";
         std::string db_dir = "./";
@@ -25,11 +32,14 @@ namespace sjm{
         std::string mkd_dir = "06.markdup";
         std::string bqc_dir = "07.bamqc";
         std::string fus_dir = "08.fusion";
-        std::string rep_dir = "09.report";
+        std::string exp_dir = "09.express";
+        std::string rep_dir = "report";
         std::string log_dir = "log";
         std::string dfq_vol = "VOL";
         bool rerun = false;
         bool local = false;
+        bool gensjm = false;
+        bool showmark = false;
         std::string version = "0.0.0";
     };
 
@@ -66,7 +76,12 @@ namespace sjm{
         std::pair<std::string, std::string> workdir = {"directory", ""};
         std::pair<std::string, std::string> host = {"host", ""};
         std::pair<std::string, std::string> sopt = {"sched_options", "-V"};
+        std::pair<std::string, std::string> status = {"status", ""};
+        int stage_marker = 0;
         std::string o1, o2; // store 1/2 output file path;
+
+        job(const int& m) : stage_marker(m){};
+        job() = default;
 
         static std::ostream& append_item(std::ostream& os, const std::pair<std::string, std::string>& item){
             if(item.second.empty()){
@@ -84,6 +99,7 @@ namespace sjm{
             append_item(os, j.queue);
             append_item(os, j.envexp);
             append_item(os, j.workdir);
+            append_item(os, j.status);
             append_item(os, j.sopt);
             append_item(os, j.host);
             os << j.end << "\n\n";
@@ -127,6 +143,10 @@ namespace sjm{
         void pre_rerun();
     };
 
+    // show stage_marker<->ana_stage relationship
+    void show_mark();
+    // update args after commandline args parsed
+    void update_args(sjm::args& a);
     // generate subdirectories
     void gen_dir(const sjm::args& a);
     // generate fastp job
@@ -145,6 +165,8 @@ namespace sjm{
     void gen_bamqc_job(const sjm::args& a, const std::string& bam, const std::string& pre, sjm::job& j);
     // generate fusion job
     void gen_fusion_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j);
+    // generate express job
+    void gen_express_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j); 
     // generate report job
     void gen_report_job(const sjm::args& a, const std::string& lib);
     // generate prelib task
