@@ -17,6 +17,7 @@ namespace sjm{
         const int maxstage = 10;
         std::string sample_list;
         std::string reg;
+        std::string queue = "";
         std::vector<int> ana_marker;
         int ini_marker = 1;
         int end_marker = 9;

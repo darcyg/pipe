@@ -259,6 +259,9 @@ void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
                 if(std::find(a.ana_marker.cbegin(), a.ana_marker.cend(), f.stage_marker) == a.ana_marker.cend()){
                     f.status.second = "done";
                 }
+                if(!a.queue.empty()){
+                    f.queue.second = a.queue;
+                }
             }
         }
         std::string sjmfile(a.sjm_dir + "/" + lib_name + "_prelib.sjm");
@@ -323,6 +326,9 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
                 for(auto& f: e){
                     if(std::find(a.ana_marker.cbegin(), a.ana_marker.cend(), f.stage_marker) == a.ana_marker.cend()){
                         f.status.second = "done";
+                    }
+                    if(!a.queue.empty()){
+                        f.queue.second = a.queue;
                     }
                 }
             }
