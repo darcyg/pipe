@@ -147,6 +147,8 @@ namespace sjm{
         std::vector<std::vector<std::vector<sjm::runfile>>> pipelist;
         int run_pipe();
         void pre_rerun();
+        std::string fail, success;
+        int ret = 0;
     };
 
     // show stage_marker<->ana_stage relationship

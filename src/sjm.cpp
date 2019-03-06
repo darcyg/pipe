@@ -376,6 +376,9 @@ void sjm::init_pipeline(const sjm::args& a, sjm::pipeline& p){
         // each pipeline has two tasks
         e.resize(2);
     }
+    p.fail = a.log_dir + "/FAIL";
+    p.success = a.log_dir + "/SUCCESS";
+    p.ret = 0;
 }
 
 // running only one sjm file
@@ -392,7 +395,7 @@ int sjm::run_task(std::vector<std::vector<sjm::runfile>>& t){
     for(size_t i = 0; i < t.size(); ++i){
         fv.clear();
         for(size_t j = 0; j < t[i].size(); ++j){
-            fv.push_back(std::async(std::launch::async, sjm::run_sjm, t[i][j].sjmcmd));
+            fv.push_back(std::async(std::launch::async, sjm::run_sjm, std::ref(t[i][j].sjmcmd)));
         }
         for(size_t k = 0; k < t[i].size(); ++k){
             t[i][k].ret = fv[k].get();
@@ -413,18 +416,24 @@ int sjm::run_task(std::vector<std::vector<sjm::runfile>>& t){
 
 // running pipeline
 int sjm::pipeline::run_pipe(){
-    int ret, fret = 0;
+    int ret;
     std::vector<std::future<int>> fv;
     for(size_t i = 0; i < this->pipelist.size(); ++i){
-        fv.push_back(std::async(std::launch::async, sjm::run_task, this->pipelist[i]));
+        fv.push_back(std::async(std::launch::async, sjm::run_task, std::ref(this->pipelist[i])));
     }
     for(auto& e: fv){
-        ret = e.get();
-        if(ret != 0){
-            fret = ret;
-        }
+        this->ret |= e.get();
     }
-    return fret;
+    if(this->ret){
+        remove(this->success.c_str());
+        std::ofstream fw(this->fail.c_str());
+        fw.close();
+    }else{
+        remove(this->fail.c_str());
+        std::ofstream fw(this->success.c_str());
+        fw.close();
+    }
+    return this->ret;
 }
 
 // prepare to rerun
