@@ -20,7 +20,7 @@ void sjm::show_mark(){
 
 // update args after commandline args parsed
 void sjm::update_args(sjm::args& a){
-    a.bin_dir = dirutil::getExecutablePath(); 
+    a.bin_dir = util::get_dirname(dirutil::getExecutablePath()); 
     a.sample_list = util::get_abspath(a.sample_list);
     a.out_dir = util::get_abspath(a.out_dir);
     a.db_dir = util::get_dirname(a.bin_dir) + "/db/";
