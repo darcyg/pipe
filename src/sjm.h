@@ -80,7 +80,13 @@ namespace sjm{
         int stage_marker = 0;
         std::string o1, o2; // store 1/2 output file path;
 
-        job(const int& m) : stage_marker(m){};
+        job(const std::string& jname, const std::string& jout, const std::string& jpre, const int& jstage) : stage_marker(jstage) {
+            name.second = jname;
+            workdir.second = jout + "/";
+            std::string sgee = workdir.second + jpre + ".sub.e";
+            std::string sgeo = workdir.second + jpre + ".sub.o";
+            sopt.second.append(" -e " + sgee + " -o " + sgeo);
+        };
         job() = default;
 
         static std::ostream& append_item(std::ostream& os, const std::pair<std::string, std::string>& item){

@@ -1,5 +1,6 @@
 #include "sjm.h"
 #include "util.h"
+#include "dirutil.h"
 
 // show stage_marker<->ana_stage relationship
 void sjm::show_mark(){
@@ -19,6 +20,7 @@ void sjm::show_mark(){
 
 // update args after commandline args parsed
 void sjm::update_args(sjm::args& a){
+    a.bin_dir = dirutil::getExecutablePath(); 
     a.sample_list = util::get_abspath(a.sample_list);
     a.out_dir = util::get_abspath(a.out_dir);
     a.db_dir = util::get_dirname(a.bin_dir) + "/db/";
@@ -29,33 +31,41 @@ void sjm::update_args(sjm::args& a){
     }else{
         std::remove_if(a.ana_marker.begin(), a.ana_marker.end(), [&a](int& e){return e < a.ini_marker || e > a.end_marker;});
     }
+    std::string sep = "/";
+    a.sjm_dir = a.out_dir + sep + a.sjm_dir;
+    a.cut_dir = a.out_dir + sep + a.cut_dir;
+    a.spl_dir = a.out_dir + sep + a.spl_dir;
+    a.fil_dir = a.out_dir + sep + a.fil_dir;
+    a.dfq_dir = a.out_dir + sep + a.dfq_dir;
+    a.aln_dir = a.out_dir + sep + a.aln_dir;
+    a.mkd_dir = a.out_dir + sep + a.mkd_dir;
+    a.bqc_dir = a.out_dir + sep + a.bqc_dir;
+    a.fus_dir = a.out_dir + sep + a.fus_dir;
+    a.exp_dir = a.out_dir + sep + a.exp_dir;
+    a.rep_dir = a.out_dir + sep + a.rep_dir;
+    a.log_dir = a.out_dir + sep + a.log_dir;
 }
 
 // prepare output sub directories
 void sjm::gen_dir(const sjm::args& a){
-    std::string sep = "/";
-    util::make_dirs(a.out_dir + sep + a.sjm_dir);
-    util::make_dirs(a.out_dir + sep + a.cut_dir);
-    util::make_dirs(a.out_dir + sep + a.spl_dir);
-    util::make_dirs(a.out_dir + sep + a.fil_dir);
-    util::make_dirs(a.out_dir + sep + a.dfq_dir);
-    util::make_dirs(a.out_dir + sep + a.aln_dir);
-    util::make_dirs(a.out_dir + sep + a.mkd_dir);
-    util::make_dirs(a.out_dir + sep + a.bqc_dir);
-    util::make_dirs(a.out_dir + sep + a.fus_dir);
-    util::make_dirs(a.out_dir + sep + a.exp_dir);
-    util::make_dirs(a.out_dir + sep + a.rep_dir);
-    util::make_dirs(a.out_dir + sep + a.log_dir);
+    util::make_dirs(a.sjm_dir);
+    util::make_dirs(a.cut_dir);
+    util::make_dirs(a.spl_dir);
+    util::make_dirs(a.fil_dir);
+    util::make_dirs(a.dfq_dir);
+    util::make_dirs(a.aln_dir);
+    util::make_dirs(a.mkd_dir);
+    util::make_dirs(a.bqc_dir);
+    util::make_dirs(a.fus_dir);
+    util::make_dirs(a.exp_dir);
+    util::make_dirs(a.rep_dir);
+    util::make_dirs(a.log_dir);
 }
 
 // generate fastp job
 void sjm::gen_fastp_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    j.name.second = "fastp";
-    j.workdir.second = a.out_dir + "/" + a.cut_dir + "/";
     std::string ofq1 = j.workdir.second + pre + ".R1.fq.gz";
     std::string ofq2 = j.workdir.second + pre + ".R2.fq.gz";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += a.bin_dir + "/fastp";
     j.cmd.second += " -i " + lib1 + " -I " + lib2; 
     j.cmd.second += " -o " + ofq1;
@@ -66,7 +76,6 @@ void sjm::gen_fastp_job(const sjm::args& a, const std::string& lib1, const std::
     j.slots.second = "2";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
     j.o1 = ofq1;
     j.o2 = ofq2;
@@ -74,10 +83,6 @@ void sjm::gen_fastp_job(const sjm::args& a, const std::string& lib1, const std::
 
 // generate splitr job
 void sjm::gen_splitr_job(const sjm::args& a, const std::string& lib1, const std::string& lib2,  const std::string& sconf, const std::string& pre, sjm::job& j){
-    j.name.second = "splitr";
-    j.workdir.second = a.out_dir + "/" + a.spl_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += a.bin_dir + "/splitr";
     j.cmd.second += " -b " + a.db_dir + "/barcode/barcode.conf";
     j.cmd.second += " -s " + sconf;
@@ -96,16 +101,11 @@ void sjm::gen_splitr_job(const sjm::args& a, const std::string& lib1, const std:
     j.slots.second = std::to_string(count + 2);
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
 }
 
 // generate filtdb job
 void sjm::gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    j.name.second = "filtdb";
-    j.workdir.second = a.out_dir + "/" + a.fil_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += a.bin_dir + "/filtdb";
     j.cmd.second += " -i " + lib1;
     j.cmd.second += " -I " + lib2;
@@ -117,7 +117,6 @@ void sjm::gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std:
     j.slots.second = "6";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";}
     j.o1 = j.workdir.second + util::get_basename(lib1);
     j.o2 = j.workdir.second + util::get_basename(lib2);
@@ -125,10 +124,6 @@ void sjm::gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std:
 
 // generate sektk job
 void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    j.name.second = "seqtk";
-    j.workdir.second = a.out_dir + "/" + a.dfq_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     if(a.dfq_vol == "VOL"){
         j.cmd.second = "ln -sf " + lib1 + " " + j.workdir.second;
         j.cmd.second += " && ln -sf " + lib2 + " " + j.workdir.second;
@@ -143,7 +138,6 @@ void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::
     j.slots.second = "1";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
     j.o1 = j.workdir.second + util::get_basename(lib1);
     j.o2 = j.workdir.second + util::get_basename(lib2);
@@ -151,10 +145,6 @@ void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::
 
 // generate alignment job
 void sjm::gen_align_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    j.name.second = "bwa";
-    j.workdir.second = a.out_dir + "/" + a.aln_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += a.bin_dir + "/bwa mem";
     j.cmd.second += " -C -t 8 " + a.db_dir + "/hg19/hg19.fa " + lib1 + " " + lib2;
     j.cmd.second += " 2> " + j.workdir.second + pre + ".memalign.log";
@@ -172,17 +162,12 @@ void sjm::gen_align_job(const sjm::args& a, const std::string& lib1, const std::
     j.slots.second = "8";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
     j.o1 = j.workdir.second + pre + ".aln.sort.bam";
 }
 
 // generate mkdup job
 void sjm::gen_mkdup_job(const sjm::args& a, const std::string& bam, const std::string& pre, sjm::job& j){
-    j.name.second = "mkdup";
-    j.workdir.second = a.out_dir + "/" + a.mkd_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += a.bin_dir + "/mkdup";
     j.cmd.second += " -i " + bam;
     j.cmd.second += " -o " + j.workdir.second + util::get_basename(bam);
@@ -196,17 +181,12 @@ void sjm::gen_mkdup_job(const sjm::args& a, const std::string& bam, const std::s
     j.slots.second = "8";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
     j.o1 = j.workdir.second + pre + ".mkdup.sort.bam";
 }
 
 // generate bamqc job
 void sjm::gen_bamqc_job(const sjm::args& a, const std::string& bam, const std::string& pre, sjm::job& j){
-    j.name.second = "bamqc";
-    j.workdir.second = a.out_dir + "/" + a.bqc_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += a.bin_dir + "/bamqc";
     j.cmd.second += " -i " + bam;
     j.cmd.second += " -b " + a.reg;
@@ -218,16 +198,11 @@ void sjm::gen_bamqc_job(const sjm::args& a, const std::string& bam, const std::s
     j.slots.second = "1";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
 }
 
 // generate fusion job
 void sjm::gen_fusion_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    j.name.second = "fusion";
-    j.workdir.second = a.out_dir + "/" + a.fus_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += "/share/public/software/mono/mono/bin/mono /share/public/software/oshell/oshell.exe";
     j.cmd.second += " --semap " + a.db_dir + "/FusionMap/ Human.B37.3 RefGene";
     j.cmd.second += " " + j.workdir.second + pre + ".fs.cfg";
@@ -236,7 +211,6 @@ void sjm::gen_fusion_job(const sjm::args& a, const std::string& lib1, const std:
     j.slots.second = "8";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";};
     sjm::fmap fm(lib1, lib2, j.workdir.second, pre);
     std::ofstream fw(j.workdir.second + pre + ".fs.cfg");
@@ -246,10 +220,6 @@ void sjm::gen_fusion_job(const sjm::args& a, const std::string& lib1, const std:
 
 // generate express job
 void sjm::gen_express_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    j.name.second = "express";
-    j.workdir.second = a.out_dir + "/" + a.exp_dir + "/";
-    std::string sgee = j.workdir.second + pre + ".sub.e";
-    std::string sgeo = j.workdir.second + pre + ".sub.o";
     j.cmd.second += "mkdir -p " + j.workdir.second + pre + " && ";
     j.cmd.second += a.bin_dir + "/kallisto";
     j.cmd.second += " quant -t 8 -i " + a.db_dir + "/ensembl/Homo_sapiens.GRCh37.cdna.all.fa.idx";
@@ -259,7 +229,6 @@ void sjm::gen_express_job(const sjm::args& a, const std::string& lib1, const std
     j.slots.second = "8";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
-    j.sopt.second.append(" -e " + sgee + " -o " + sgeo);
     if(a.local){j.host.second = "localhost";}
 }
 
@@ -277,7 +246,8 @@ void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
         iss.clear();
         iss.str(tmp_str);
         iss >> sample_no >> flow_cell >> lib_name >> read1 >> read2 >> barcode_conf;
-        sjm::job jfastp(1), jsplitr(2);
+        sjm::job jfastp("fastp", a.cut_dir, lib_name, 1);
+        sjm::job jsplitr("splitr", a.spl_dir, lib_name, 2);
         sjm::gen_fastp_job(a, read1, read2, lib_name, jfastp);
         sjm::gen_splitr_job(a, jfastp.o1, jfastp.o2, barcode_conf, lib_name, jsplitr);
         sjm::task t;
@@ -291,12 +261,12 @@ void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
                 }
             }
         }
-        std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.sjm");
-        std::string sjmlogf(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.log");
+        std::string sjmfile(a.sjm_dir + "/" + lib_name + "_prelib.sjm");
+        std::string sjmlogf(a.sjm_dir + "/" + lib_name + "_prelib.log");
         sjm::runfile rf;
         rf.sjmcmd = a.bin_dir + "/sjm -i --log_level verbose -l " + sjmlogf + " " + sjmfile;
-        rf.sucf = a.out_dir + "/" + a.log_dir + "/" + lib_name + ".Prelib.SUCCESS";
-        rf.faif = a.out_dir + "/" + a.log_dir + "/" + lib_name + ".Prelib.FAIL";
+        rf.sucf = a.log_dir + "/" + lib_name + ".Prelib.SUCCESS";
+        rf.faif = a.log_dir + "/" + lib_name + ".Prelib.FAIL";
         rf.logf = sjmlogf;
         p.pipelist[count][0].push_back(rf);
         ++count;
@@ -324,9 +294,15 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             iss2.clear();
             iss2.str(tmp_str);
             iss2 >> sublib;
-            subr1 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R1.fq";
-            subr2 = a.out_dir + "/" + a.spl_dir + "/" + sublib + ".R2.fq";
-            sjm::job jfiltdb(3), jseqtk(4), jaln(5), jmkdup(6), jbamqc(7), jfusion(8), jexpress(9);
+            subr1 = a.spl_dir + "/" + sublib + ".R1.fq";
+            subr2 = a.spl_dir + "/" + sublib + ".R2.fq";
+            sjm::job jfiltdb("filtdb", a.fil_dir, sublib, 3);
+            sjm::job jseqtk("seqtk", a.dfq_dir, sublib, 4);
+            sjm::job jaln("bwa", a.aln_dir, sublib, 5);
+            sjm::job jmkdup("mkdup", a.mkd_dir, sublib, 6);
+            sjm::job jbamqc("bamqc", a.bqc_dir, sublib, 7);
+            sjm::job jfusion("fusionmap", a.fus_dir, sublib, 8);
+            sjm::job jexpress("kalliso", a.exp_dir, sublib, 9);
             sjm::gen_filtdb_job(a, subr1, subr2, sublib, jfiltdb);
             sjm::gen_seqtk_job(a, jfiltdb.o1, jfiltdb.o2, sublib, jseqtk);
             sjm::gen_align_job(a, jseqtk.o1, jseqtk.o2, sublib, jaln);
@@ -350,12 +326,12 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
                     }
                 }
             }
-            std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.sjm");
-            std::string sjmlogf(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.log");
+            std::string sjmfile(a.sjm_dir + "/" + sublib + "_analib.sjm");
+            std::string sjmlogf(a.sjm_dir + "/" + sublib + "_analib.log");
             sjm::runfile rf;
             rf.sjmcmd = a.bin_dir + "/sjm -i --log_level verbose -l " + sjmlogf + " " + sjmfile;
-            rf.sucf = a.out_dir + "/" + a.log_dir + "/" + sublib + ".Analysis.SUCCESS";
-            rf.faif = a.out_dir + "/" + a.log_dir + "/" + sublib + ".Analysis.FAIL";
+            rf.sucf = a.log_dir + "/" + sublib + ".Analysis.SUCCESS";
+            rf.faif = a.log_dir + "/" + sublib + ".Analysis.FAIL";
             rf.logf = sjmlogf;
             p.pipelist[count][1].push_back(rf);
             std::ofstream fw(sjmfile);
@@ -383,8 +359,8 @@ void sjm::init_pipeline(const sjm::args& a, sjm::pipeline& p){
         // each pipeline has two tasks
         e.resize(2);
     }
-    p.faif = a.out_dir + "/" + a.log_dir + "/FAIL";
-    p.sucf = a.out_dir + "/" + a.log_dir + "/SUCCESS";
+    p.faif = a.log_dir + "/FAIL";
+    p.sucf = a.log_dir + "/SUCCESS";
     p.ret = 0;
 }
 

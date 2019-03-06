@@ -8,7 +8,6 @@
 #include "CLI.hpp"
 #include "sjm.h"
 #include "util.h"
-#include "whereami.c"
 
 int main(int argc, char** argv)
 {
@@ -39,11 +38,6 @@ int main(int argc, char** argv)
         frun << argv[i] << " ";
     }
 
-    std::string pe(argv[0]);
-    int lpe = pe.length();
-    char ape[PATH_MAX];
-    wai_getExecutablePath(ape, PATH_MAX, &lpe);
-    a.bin_dir = std::string(ape);
     sjm::update_args(a);
     sjm::pipeline p;
     sjm::init_pipeline(a, p);
