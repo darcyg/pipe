@@ -135,10 +135,16 @@ namespace sjm{
         }
     };
 
+    struct runfile{
+        std::string sjmcmd;
+        std::string fail;
+        std::string success;
+        int ret = 0;
+    };
+
     // a pipeline contain a sequences of sjm files
     struct pipeline{
-        std::vector<std::vector<std::vector<std::string>>> pipelist;
-        std::vector<int> njob;
+        std::vector<std::vector<std::vector<sjm::runfile>>> pipelist;
         int run_pipe();
         void pre_rerun();
     };
@@ -178,7 +184,7 @@ namespace sjm{
     // run sjm
     int run_sjm(const std::string& sjm);
     // run task
-    int run_task(const std::vector<std::vector<std::string>>& task);
+    int run_task(std::vector<std::vector<sjm::runfile>>& task);
 }
 
 #endif
