@@ -3,10 +3,12 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <climits>
 #include "libgen.h"
 #include "CLI.hpp"
 #include "sjm.h"
 #include "util.h"
+#include "whereami.c"
 
 int main(int argc, char** argv)
 {
@@ -36,8 +38,17 @@ int main(int argc, char** argv)
         sjm::show_mark();
         exit(0);
     }
+    
+    std::ofstream frun("./run.sh");
+    for(int i = 0; i < argc; ++i){
+        frun << argv[i] << " ";
+    }
 
-    a.bin_dir = util::get_dirname(util::get_abspath(argv[0]));
+    std::string pe(argv[0]);
+    int lpe = pe.length();
+    char ape[PATH_MAX];
+    wai_getExecutablePath(ape, PATH_MAX, &lpe);
+    a.bin_dir = std::string(ape);
     sjm::update_args(a);
     sjm::pipeline p;
     sjm::init_pipeline(a, p);

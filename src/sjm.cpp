@@ -290,10 +290,12 @@ void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
             }
         }
         std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.sjm");
+        std::string sjmlogf(a.out_dir + "/" + a.sjm_dir + "/" + lib_name + "_prelib.log");
         sjm::runfile rf;
-        rf.sjmcmd = a.bin_dir + "/sjm -i " + sjmfile;
-        rf.fail = a.out_dir + "/" + a.log_dir + "/" + lib_name + ".Prelib.SUCCESS";
-        rf.success = a.out_dir + "/" + a.log_dir + "/" + lib_name + ".Prelib.FAIL";
+        rf.sjmcmd = a.bin_dir + "/sjm -i --log_level verbose -l " + sjmlogf + " " + sjmfile;
+        rf.sucf = a.out_dir + "/" + a.log_dir + "/" + lib_name + ".Prelib.SUCCESS";
+        rf.faif = a.out_dir + "/" + a.log_dir + "/" + lib_name + ".Prelib.FAIL";
+        rf.logf = sjmlogf;
         p.pipelist[count][0].push_back(rf);
         ++count;
         std::ofstream fw(sjmfile);
@@ -329,6 +331,7 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             sjm::gen_mkdup_job(a, jaln.o1, sublib, jmkdup);
             sjm::gen_bamqc_job(a, jmkdup.o1, sublib, jbamqc);
             sjm::gen_fusion_job(a, jseqtk.o1, jseqtk.o2, sublib, jfusion);
+            sjm::gen_express_job(a, jseqtk.o1, jseqtk.o2, sublib, jexpress);
             sjm::task t;
             t.joblist.resize(6);
             t.joblist[0].push_back(jfiltdb);
@@ -346,10 +349,12 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
                 }
             }
             std::string sjmfile(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.sjm");
+            std::string sjmlogf(a.out_dir + "/" + a.sjm_dir + "/" + sublib + "_analib.log");
             sjm::runfile rf;
-            rf.sjmcmd = a.bin_dir + "/sjm -i " + sjmfile;
-            rf.fail = a.out_dir + "/" + a.log_dir + "/" + sublib + ".Analysis.SUCCESS";
-            rf.success = a.out_dir + "/" + a.log_dir + "/" + sublib + ".Analysis.FAIL";
+            rf.sjmcmd = a.bin_dir + "/sjm -i --log_level verbose -l " + sjmlogf + " " + sjmfile;
+            rf.sucf = a.out_dir + "/" + a.log_dir + "/" + sublib + ".Analysis.SUCCESS";
+            rf.faif = a.out_dir + "/" + a.log_dir + "/" + sublib + ".Analysis.FAIL";
+            rf.logf = sjmlogf;
             p.pipelist[count][1].push_back(rf);
             std::ofstream fw(sjmfile);
             fw << t;
@@ -376,8 +381,8 @@ void sjm::init_pipeline(const sjm::args& a, sjm::pipeline& p){
         // each pipeline has two tasks
         e.resize(2);
     }
-    p.fail = a.log_dir + "/FAIL";
-    p.success = a.log_dir + "/SUCCESS";
+    p.faif = a.out_dir + "/" + a.log_dir + "/FAIL";
+    p.sucf = a.out_dir + "/" + a.log_dir + "/SUCCESS";
     p.ret = 0;
 }
 
@@ -390,7 +395,6 @@ int sjm::run_sjm(const std::string& sjm){
 // running only one parallel task
 int sjm::run_task(std::vector<std::vector<sjm::runfile>>& t){
     std::vector<std::future<int>> fv;
-    int ret = 0;
     int fret = 0;
     for(size_t i = 0; i < t.size(); ++i){
         fv.clear();
@@ -400,13 +404,13 @@ int sjm::run_task(std::vector<std::vector<sjm::runfile>>& t){
         for(size_t k = 0; k < t[i].size(); ++k){
             t[i][k].ret = fv[k].get();
             if(t[i][k].ret){
-                remove(t[i][k].success.c_str());
-                std::ofstream fw(t[i][k].fail.c_str());
+                remove(t[i][k].sucf.c_str());
+                std::ofstream fw(t[i][k].faif.c_str());
                 fw.close();
-                fret = -1;
+                fret = 1;
             }else{
-                remove(t[i][k].fail.c_str());
-                std::ofstream fw(t[i][k].success.c_str());
+                remove(t[i][k].faif.c_str());
+                std::ofstream fw(t[i][k].sucf.c_str());
                 fw.close();
             }
         }
@@ -416,21 +420,20 @@ int sjm::run_task(std::vector<std::vector<sjm::runfile>>& t){
 
 // running pipeline
 int sjm::pipeline::run_pipe(){
-    int ret;
     std::vector<std::future<int>> fv;
     for(size_t i = 0; i < this->pipelist.size(); ++i){
         fv.push_back(std::async(std::launch::async, sjm::run_task, std::ref(this->pipelist[i])));
     }
     for(auto& e: fv){
-        this->ret |= e.get();
+        this->ret += std::abs(e.get());
     }
     if(this->ret){
-        remove(this->success.c_str());
-        std::ofstream fw(this->fail.c_str());
+        remove(this->sucf.c_str());
+        std::ofstream fw(this->faif.c_str());
         fw.close();
     }else{
-        remove(this->fail.c_str());
-        std::ofstream fw(this->success.c_str());
+        remove(this->faif.c_str());
+        std::ofstream fw(this->sucf.c_str());
         fw.close();
     }
     return this->ret;
@@ -442,8 +445,9 @@ void sjm::pipeline::pre_rerun(){
     for(size_t i = 0; i < this->pipelist.size(); ++i){
         for(size_t j = 0; j < this->pipelist[i].size(); ++j){
             for(auto& e :this->pipelist[i][j]){
-                remove(e.fail.c_str());
-                remove(e.success.c_str());
+                remove(e.faif.c_str());
+                remove(e.sucf.c_str());
+                remove(e.logf.c_str());
                 auto p = e.sjmcmd.find_last_of(" "); //get the position just befor sjm path
                 orisjm = e.sjmcmd.substr(p + 1);
                 newsjm = orisjm + ".status";
@@ -457,4 +461,15 @@ void sjm::pipeline::pre_rerun(){
             }
         }
     }
+}
+
+// test logfile to see any error happen or not
+bool sjm::test_job_fail(const std::string& log){
+    std::ifstream fr(log);
+    std::ostringstream oss;
+    oss << fr.rdbuf();
+    std::string logs = oss.str();
+    auto p = logs.find("Failed jobs");
+    fr.close();
+    return p != std::string::npos;
 }

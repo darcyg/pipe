@@ -137,8 +137,9 @@ namespace sjm{
 
     struct runfile{
         std::string sjmcmd;
-        std::string fail;
-        std::string success;
+        std::string faif;
+        std::string sucf;
+        std::string logf;
         int ret = 0;
     };
 
@@ -147,7 +148,7 @@ namespace sjm{
         std::vector<std::vector<std::vector<sjm::runfile>>> pipelist;
         int run_pipe();
         void pre_rerun();
-        std::string fail, success;
+        std::string faif, sucf;
         int ret = 0;
     };
 
@@ -187,6 +188,8 @@ namespace sjm{
     int run_sjm(const std::string& sjm);
     // run task
     int run_task(std::vector<std::vector<sjm::runfile>>& task);
+    // test logfile to see any error happen
+    bool test_job_fail(const std::string& log);
 }
 
 #endif
