@@ -8,11 +8,13 @@ void sjm::show_mark(){
                                     "bam QC by bamqc", "fusion calling by fusionMap", "express quant by kallisto",
                                     "report by genrep"};
     std::cout << std::left;
-    std::cout << std::setw(10) << "Marker" << std::setw(20) << "Analysis" << std::endl;
+    std::cout << "  ┌--------------------------------------┐" << std::endl;
+    std::cout << "  |" << std::setw(10) << "Marker" << std::setw(28) << "Analysis" << "|" << std::endl;
     for(size_t i = 0; i < stg.size(); ++i){
-        std::cout << "--------------------------------------" << std::endl;
-        std::cout << std::setw(10) << i + 1 << std::setw(20) << stg[i] << std::endl;
+        std::cout << "  |--------------------------------------|" << std::endl;
+        std::cout << "  |" << std::setw(10) << i + 1 << std::setw(28) << stg[i] << "|" << std::endl;
     }
+    std::cout << "  └--------------------------------------┘" << std::endl;
 }
 
 // update args after commandline args parsed
