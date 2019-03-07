@@ -125,10 +125,12 @@ void sjm::gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std:
 // generate sektk job
 void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
     if(a.dfq_vol == "VOL"){
-        j.cmd.second = "ln -sf " + lib1 + " " + j.workdir.second;
+        j.cmd.second = "rm -f " + j.workdir.second + util::get_basename(lib1);
+        j.cmd.second += " && rm -f " + j.workdir.second + util::get_basename(lib2);
+        j.cmd.second += " && ln -sf " + lib1 + " " + j.workdir.second;
         j.cmd.second += " && ln -sf " + lib2 + " " + j.workdir.second;
-        j.cmd.second += " > " + j.workdir.second + pre + ".link.log 2>&1";
-    }else{
+    }
+    else{
         j.cmd.second = a.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + a.dfq_vol;
         j.cmd.second += " > " + j.workdir.second + util::get_basename(lib1);
         j.cmd.second += " && " + a.bin_dir + "/seqtk sample -2 -s 100 " + lib2 + " " + a.dfq_vol;
@@ -151,6 +153,7 @@ void sjm::gen_align_job(const sjm::args& a, const std::string& lib1, const std::
     j.cmd.second += " | " + a.bin_dir + "/samtools view -@ 8";
     j.cmd.second += " -o " + j.workdir.second + pre + ".aln.bam";
     j.cmd.second += " >> " + j.workdir.second + pre + ".memalign.log";
+    j.cmd.second += " && rm -rf " + j.workdir.second + pre + ".aln.sort.bam*";
     j.cmd.second += " && " + a.bin_dir + "/samtools sort -@ 8";
     j.cmd.second += " -o " + j.workdir.second + pre + ".aln.sort.bam";
     j.cmd.second += " " + j.workdir.second + pre + ".aln.bam";
@@ -172,6 +175,7 @@ void sjm::gen_mkdup_job(const sjm::args& a, const std::string& bam, const std::s
     j.cmd.second += " -i " + bam;
     j.cmd.second += " -o " + j.workdir.second + util::get_basename(bam);
     j.cmd.second += " > " + j.workdir.second + pre + ".mkdup.log 2>&1";
+    j.cmd.second += " rm -rf " + j.workdir.second + pre + ".mkdup.sort.bam*";
     j.cmd.second += " && " + a.bin_dir + "/samtools sort -@ 8 -o " + j.workdir.second + pre + ".mkdup.sort.bam";
     j.cmd.second += " " + j.workdir.second + util::get_basename(bam);
     j.cmd.second += " > " + j.workdir.second + pre + ".mkdup.sort.log 2>&1";
