@@ -259,10 +259,16 @@ void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
         t.joblist.resize(2);
         t.joblist[0].push_back(jfastp);
         t.joblist[1].push_back(jsplitr);
+        std::string sjmstatus(a.sjm_dir + "/" + lib_name + "_prelib.sjm.status");
+        std::map<std::string, std::string> jmap;
+        sjm::get_status(jmap, sjmstatus);
         for(auto& e: t.joblist){
             for(auto& f: e){
                 if(std::find(a.ana_marker.cbegin(), a.ana_marker.cend(), f.stage_marker) == a.ana_marker.cend()){
                     f.status.second = "done";
+                }
+                if(a.update && jmap.find(f.name.second) != jmap.end()){
+                    f.status.second = jmap[f.name.second];
                 }
                 if(!a.queue.empty()){
                     f.queue.second = a.queue;
@@ -327,10 +333,16 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             t.joblist[2].push_back(jexpress);
             t.joblist[3].push_back(jmkdup);
             t.joblist[4].push_back(jbamqc);
+            std::string sjmstatus = a.sjm_dir + "/" + sublib + "_analib.sjm.status";
+            std::map<std::string, std::string> jmap;
+            sjm::get_status(jmap, sjmstatus);
             for(auto& e: t.joblist){
                 for(auto& f: e){
                     if(std::find(a.ana_marker.cbegin(), a.ana_marker.cend(), f.stage_marker) == a.ana_marker.cend()){
                         f.status.second = "done";
+                    }
+                    if(a.update && jmap.find(f.name.second) != jmap.end()){
+                        f.status.second = jmap[f.name.second];
                     }
                     if(!a.queue.empty()){
                         f.queue.second = a.queue;
@@ -445,7 +457,9 @@ void sjm::pipeline::pre_rerun(){
                 std::ifstream fr(newsjm.c_str());
                 if(fr.is_open()){
                     fr.close();
-                    std::rename(newsjm.c_str(), orisjm.c_str());
+                    if(!this->update){
+                        std::rename(newsjm.c_str(), orisjm.c_str());
+                    }
                 }
             }
         }
@@ -461,4 +475,25 @@ bool sjm::test_job_fail(const std::string& log){
     auto p = logs.find("Failed jobs");
     fr.close();
     return p != std::string::npos;
+}
+
+// get map of stage finish status
+void sjm::get_status(std::map<std::string, std::string>& jmap, std::string& jfile){
+    std::pair<std::string, std::string> pjob;
+    std::ifstream fr(jfile);
+    std::istringstream iss;
+    std::string line, prefix, suffix;
+    while(std::getline(fr, line)){
+        iss.clear();
+        iss.str(line);
+        iss >> prefix >> suffix;
+        if(prefix == "name"){
+            pjob.first = suffix;
+        }
+        if(prefix == "status"){
+            pjob.second = suffix;
+            jmap[pjob.first] = pjob.second;
+        }
+    }
+    fr.close();
 }

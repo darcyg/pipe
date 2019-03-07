@@ -1,9 +1,11 @@
 #ifndef SJM_H
 #define SJM_H
 
+#include <map>
 #include <future>
 #include <string>
 #include <vector>
+#include <utility>
 #include <ostream>
 #include <sstream>
 #include <fstream>
@@ -41,7 +43,7 @@ namespace sjm{
         bool rerun = false;
         bool local = false;
         bool gensjm = false;
-        bool showmark = false;
+        bool update = false;
         std::string version = "0.0.0";
     };
 
@@ -158,6 +160,9 @@ namespace sjm{
         void pre_rerun();
         std::string faif, sucf;
         int ret = 0;
+        bool update = false;
+        pipeline(const bool& u) : update(u){};
+        pipeline() = default;
     };
 
     // show stage_marker<->ana_stage relationship
@@ -198,6 +203,8 @@ namespace sjm{
     int run_task(std::vector<std::vector<sjm::runfile>>& task);
     // test logfile to see any error happen
     bool test_job_fail(const std::string& log);
+    // get map of stage finish status
+    void get_status(std::map<std::string, std::string>& jmap, std::string& jfile);
 }
 
 #endif

@@ -30,14 +30,15 @@ int main(int argc, char** argv)
     app.add_option("-i,--imark", a.ini_marker, "initial analysis marker")->check(CLI::Range(a.minstage, a.maxstage));
     app.add_option("-e,--emark", a.end_marker, "end analysis marker")->check(CLI::Range(a.minstage, a.maxstage));
     app.add_option("-q,--queue", a.queue, "queue to run tasks");
-    app.add_flag("-c,--ctd", a.rerun, "continue from last failure");
+    CLI::Option* prerun = app.add_flag("-c,--ctd", a.rerun, "continue from last failure");
     app.add_flag("-l,--loc", a.local, "run in localhost");
     app.add_flag("-g,--gen", a.gensjm, "generate sjms, not run tasks");
+    app.add_flag("-u,--update", a.update, "update command to execute")->needs(prerun);
     CLI_PARSE(app, argc, argv);
      
     util::make_dirs(a.out_dir);
     sjm::update_args(a);
-    sjm::pipeline p;
+    sjm::pipeline p(a.update);
     sjm::init_pipeline(a, p);
     sjm::gen_dir(a);
     sjm::gen_prelib_task(a, p);

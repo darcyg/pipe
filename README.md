@@ -1,6 +1,6 @@
 program: fusepipe  
 version: 0.0.0  
-updated: 22:36:22 Mar  6 2019  
+updated: 22:53:39 Mar  7 2019  
 Usage: fusepipe [OPTIONS]  
 
 |  Options                    | Explanations
@@ -18,6 +18,7 @@ Usage: fusepipe [OPTIONS]
 |  -c,--ctd                   | continue from last failure
 |  -l,--loc                   | run in localhost
 |  -g,--gen                   | generate sjms, not run tasks
+|  -u,--update Needs: --ctd   | update command to execute
 
 Installation
 
