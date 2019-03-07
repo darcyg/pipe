@@ -34,12 +34,8 @@ int main(int argc, char** argv)
     app.add_flag("-l,--loc", a.local, "run in localhost");
     app.add_flag("-g,--gen", a.gensjm, "generate sjms, not run tasks");
     CLI_PARSE(app, argc, argv);
-    
-    std::ofstream frun("./run.sh");
-    for(int i = 0; i < argc; ++i){
-        frun << argv[i] << " ";
-    }
-
+     
+    util::make_dirs(a.out_dir);
     sjm::update_args(a);
     sjm::pipeline p;
     sjm::init_pipeline(a, p);
