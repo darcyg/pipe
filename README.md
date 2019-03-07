@@ -7,7 +7,8 @@ Usage: fusepipe [OPTIONS]
 |-----------------------------|---------------------------------
 |  -h,--help                  | Print this help message and exit
 |  -s,--slist FILE REQUIRED   | sample list file
-|  -r,--regf FILE REQUIRED    | bed region file
+|  -r,--ref FILE REQUIRED     | reference file
+|  -b,--bed FILE REQUIRED     | bed region file
 |  -v,--vread TEXT            | fastq  subset reads number
 |  -o,--out TEXT              | output directory
 |  -a,--amark INT in [1 - 10] | analysis marker range
@@ -24,11 +25,14 @@ Installation
 `git clone https://github.com/vanNul/pipe`
 
 2. compile  
-`cd pipe`
-`./autogen.sh`
-`./configure --prefix=/path/to/install/dir/`
-`make`
-`make install`
+`cd pipe`  
+`./autogen.sh`  
+`./configure --prefix=/path/to/install/dir/`  
+`make`  
+`make install`  
+
+3. execute  
+`/path/to/install/dir/bin/fusepipe`  
 
 PS  
 this is a sjm based fusion pipeline  
