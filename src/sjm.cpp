@@ -146,7 +146,7 @@ void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::
 // generate alignment job
 void sjm::gen_align_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
     j.cmd.second += a.bin_dir + "/bwa mem";
-    j.cmd.second += " -C -t 8 " + a.db_dir + "/hg19/hg19.fa " + lib1 + " " + lib2;
+    j.cmd.second += " -C -t 8 " + a.ref + " " + lib1 + " " + lib2;
     j.cmd.second += " 2> " + j.workdir.second + pre + ".memalign.log";
     j.cmd.second += " | " + a.bin_dir + "/samtools view -@ 8";
     j.cmd.second += " -o " + j.workdir.second + pre + ".aln.bam";

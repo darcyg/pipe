@@ -16,6 +16,7 @@ namespace sjm{
         const int minstage = 1;
         const int maxstage = 10;
         std::string sample_list;
+        std::string ref;
         std::string reg;
         std::string queue = "";
         std::vector<int> ana_marker;
