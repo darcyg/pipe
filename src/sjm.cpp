@@ -173,6 +173,7 @@ void sjm::gen_mkdup_job(const sjm::args& a, const std::string& bam, const std::s
     j.cmd.second += " -o " + j.workdir.second + util::get_basename(bam);
     j.cmd.second += " > " + j.workdir.second + pre + ".mkdup.log 2>&1";
     j.cmd.second += " && " + a.bin_dir + "/samtools sort -@ 8 -o " + j.workdir.second + pre + ".mkdup.sort.bam";
+    j.cmd.second += " " + j.workdir.second + util::get_basename(bam);
     j.cmd.second += " > " + j.workdir.second + pre + ".mkdup.sort.log 2>&1";
     j.cmd.second += " && " + a.bin_dir + "/samtools index ";
     j.cmd.second += j.workdir.second + pre + ".mkdup.sort.bam";
