@@ -239,7 +239,29 @@ void sjm::gen_express_job(const sjm::args& a, const std::string& lib1, const std
 
 // generate report job
 void sjm::gen_report_job(const sjm::args& a, const std::string& lib){
+    std::string filtlog = a.fil_dir + "/" + lib + ".filt.log";
+    std::string ddpqc = a.bqc_dir + "/" + lib + "_DDP_QC.tsv";
+    std::string idpqc = a.bqc_dir + "/" + lib + "_IDP_QC.tsv";
+    std::string fusrpt = a.fus_dir + "/" + lib + "/" + lib + ".FusionReport.txt";
+    std::string abundance = a.exp_dir + "/" + lib + "/abundance.tsv";
+    std::string ens2gen = a.db_dir + "/NCBI/ensebml2genename";
+    std::string gset11 = a.db_dir + "/gset/gset11.tsv";
+    std::string gset19 = a.db_dir + "gset/gset19.tsv";
+    std::string outf1 = a.rep_dir + "/" + lib + "_GSet11.xlsx";
+    std::string outf2 = a.rep_dir + "/" + lib + "_GSet19.xlsx";
+    j.cmd.second = a.bin_dir + "/genrpt";
+    j.cmd.second += " -f " + filtlog + " -d " + ddpqc + " -i " + idpqc + " -s " + fusrpt;
+    j.cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + gset11 + " -o " + outf1;
+    j.cmd.second += " && " + a.bin_dir + "/genrpt";
+    j.cmd.second += " -f " + filtlog + " -d " + ddpqc + " -i " + idpqc + " -s " + fusrpt;
+    j.cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + gset19 + " -o " + outf2;
+    j.memory.second = "1g";
+    j.slots.second = "1";
+    j.sopt.second.append(" -l p=" + j.slots.second);
+    j.sopt.second.append(" -l vf=" + j.memory.second);
+    if(a.local){j.host.second = "localhost";}
 }
+
 // generate prelib task
 void sjm::gen_prelib_task(const sjm::args& a, sjm::pipeline& p){
     std::ifstream fr(a.sample_list);
@@ -317,6 +339,7 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             sjm::job jbamqc("bamqc", a.bqc_dir, sublib, 7);
             sjm::job jfusion("fusionmap", a.fus_dir, sublib, 8);
             sjm::job jexpress("kalliso", a.exp_dir, sublib, 9);
+            sjm::job jreport("genrpt", a.rep_dir, sublib, 10);
             sjm::gen_filtdb_job(a, subr1, subr2, sublib, jfiltdb);
             sjm::gen_seqtk_job(a, jfiltdb.o1, jfiltdb.o2, sublib, jseqtk);
             sjm::gen_align_job(a, jseqtk.o1, jseqtk.o2, sublib, jaln);
@@ -324,6 +347,7 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             sjm::gen_bamqc_job(a, jmkdup.o1, sublib, jbamqc);
             sjm::gen_fusion_job(a, jseqtk.o1, jseqtk.o2, sublib, jfusion);
             sjm::gen_express_job(a, jseqtk.o1, jseqtk.o2, sublib, jexpress);
+            sjm::gen_report_job(a, sublib);
             sjm::task t;
             t.joblist.resize(6);
             t.joblist[0].push_back(jfiltdb);
