@@ -31,6 +31,9 @@ void sjm::update_args(sjm::args& a){
     }else{
         std::remove_if(a.ana_marker.begin(), a.ana_marker.end(), [&a](int& e){return e < a.ini_marker || e > a.end_marker;});
     }
+    if(a.gset.empty()){
+        a.gset = a.db_dir + "gset/kgset.tsv";
+    }
     std::string sep = "/";
     a.sjm_dir = a.out_dir + sep + a.sjm_dir;
     a.cut_dir = a.out_dir + sep + a.cut_dir;
@@ -238,23 +241,17 @@ void sjm::gen_express_job(const sjm::args& a, const std::string& lib1, const std
 }
 
 // generate report job
-void sjm::gen_report_job(const sjm::args& a, const std::string& lib){
+void sjm::gen_report_job(const sjm::args& a, const std::string& lib, sjm::job& j){
     std::string filtlog = a.fil_dir + "/" + lib + ".filt.log";
     std::string ddpqc = a.bqc_dir + "/" + lib + "_DDP_QC.tsv";
     std::string idpqc = a.bqc_dir + "/" + lib + "_IDP_QC.tsv";
     std::string fusrpt = a.fus_dir + "/" + lib + "/" + lib + ".FusionReport.txt";
     std::string abundance = a.exp_dir + "/" + lib + "/abundance.tsv";
     std::string ens2gen = a.db_dir + "/NCBI/ensebml2genename";
-    std::string gset11 = a.db_dir + "/gset/gset11.tsv";
-    std::string gset19 = a.db_dir + "gset/gset19.tsv";
-    std::string outf1 = a.rep_dir + "/" + lib + "_GSet11.xlsx";
-    std::string outf2 = a.rep_dir + "/" + lib + "_GSet19.xlsx";
+    std::string outf = a.rep_dir + "/" + lib + ".report.xlsx";
     j.cmd.second = a.bin_dir + "/genrpt";
     j.cmd.second += " -f " + filtlog + " -d " + ddpqc + " -i " + idpqc + " -s " + fusrpt;
-    j.cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + gset11 + " -o " + outf1;
-    j.cmd.second += " && " + a.bin_dir + "/genrpt";
-    j.cmd.second += " -f " + filtlog + " -d " + ddpqc + " -i " + idpqc + " -s " + fusrpt;
-    j.cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + gset19 + " -o " + outf2;
+    j.cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + a.gset  + " -o " + outf;
     j.memory.second = "1g";
     j.slots.second = "1";
     j.sopt.second.append(" -l p=" + j.slots.second);
@@ -347,7 +344,7 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             sjm::gen_bamqc_job(a, jmkdup.o1, sublib, jbamqc);
             sjm::gen_fusion_job(a, jseqtk.o1, jseqtk.o2, sublib, jfusion);
             sjm::gen_express_job(a, jseqtk.o1, jseqtk.o2, sublib, jexpress);
-            sjm::gen_report_job(a, sublib);
+            sjm::gen_report_job(a, sublib, jreport);
             sjm::task t;
             t.joblist.resize(6);
             t.joblist[0].push_back(jfiltdb);
@@ -357,6 +354,7 @@ void sjm::gen_analib_task(const sjm::args& a, sjm::pipeline& p){
             t.joblist[2].push_back(jexpress);
             t.joblist[3].push_back(jmkdup);
             t.joblist[4].push_back(jbamqc);
+            t.joblist[5].push_back(jreport);
             std::string sjmstatus = a.sjm_dir + "/" + sublib + "_analib.sjm.status";
             std::map<std::string, std::string> jmap;
             sjm::get_status(jmap, sjmstatus);

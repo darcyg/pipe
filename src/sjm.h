@@ -20,10 +20,11 @@ namespace sjm{
         std::string sample_list;
         std::string ref;
         std::string reg;
+        std::string gset;
         std::string queue = "";
         std::vector<int> ana_marker;
         int ini_marker = 1;
-        int end_marker = 9;
+        int end_marker = 10;
         std::string out_dir = "./";
         std::string bin_dir = "./";
         std::string db_dir = "./";
@@ -190,7 +191,7 @@ namespace sjm{
     // generate express job
     void gen_express_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j); 
     // generate report job
-    void gen_report_job(const sjm::args& a, const std::string& lib);
+    void gen_report_job(const sjm::args& a, const std::string& lib, sjm::job& j);
     // generate prelib task
     void gen_prelib_task(const sjm::args& a, sjm::pipeline& p);
     // generate analib task

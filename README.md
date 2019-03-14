@@ -9,6 +9,7 @@ Usage: fusepipe [OPTIONS]
 |  -s,--slist FILE REQUIRED   | sample list file
 |  -r,--ref FILE REQUIRED     | reference file
 |  -b,--bed FILE REQUIRED     | bed region file
+|  -t,--gset FILE             | gene list
 |  -v,--vread TEXT            | fastq  subset reads number
 |  -o,--out TEXT              | output directory
 |  -a,--amark INT in [1 - 10] | analysis marker range

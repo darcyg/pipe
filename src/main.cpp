@@ -24,6 +24,7 @@ int main(int argc, char** argv)
     app.add_option("-s,--slist", a.sample_list, "sample list file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-r,--ref", a.ref, "reference file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-b,--bed", a.reg, "bed region file")->required(true)->check(CLI::ExistingFile);
+    app.add_option("-t,--gset", a.gset, "gene list")->check(CLI::ExistingFile);
     app.add_option("-v,--vread", a.dfq_vol, "fastq  subset reads number");
     app.add_option("-o,--out", a.out_dir, "output directory");
     app.add_option("-a,--amark", a.ana_marker, "analysis marker range")->check(CLI::Range(a.minstage, a.maxstage));
