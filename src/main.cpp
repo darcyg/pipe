@@ -18,6 +18,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    util::loginfo("parsing arguments started.");
     sjm::args a;
     std::string cmp_time = std::string(__TIME__) + " " + std::string(__DATE__);
     CLI::App app("program: " + std::string(basename(argv[0])) + "\nversion: " + a.version + "\nupdated: " + cmp_time);
@@ -36,18 +37,44 @@ int main(int argc, char** argv)
     app.add_flag("-g,--gen", a.gensjm, "generate sjms, not run tasks");
     app.add_flag("-u,--update", a.update, "update command to execute")->needs(prerun);
     CLI_PARSE(app, argc, argv);
+    util::loginfo("parsing arguments finished.");
      
+    util::loginfo("preparing output parent directory.");
     util::makedir(a.out_dir);
+    util::loginfo("output parent directory prepared.");
+    
+    util::loginfo("updating arguments.");
     sjm::update_args(a);
+    util::loginfo("arguments updated.");
+    
+    util::loginfo("construct pipeline object.");
     sjm::pipeline p(a.update);
+    util::loginfo("pipeline object construced.");
+
+    util::loginfo("initialize pipeline.");
     sjm::init_pipeline(a, p);
+    util::loginfo("pipeline initialized.");
+
+    util::loginfo("generate subdirectories.");
     sjm::gen_dir(a);
+    util::loginfo("subdirectories generated.");
+
+    util::loginfo("generate library prepare sub pipeline.");
     sjm::gen_prelib_task(a, p);
+    util::loginfo("library prpare sub pipeline generated.");
+    
+    util::loginfo("generate library analysis pipeline.");
     sjm::gen_analib_task(a, p);
+    util::loginfo("library analysis pipeline generated.");
+    
     if(a.rerun){
+        util::loginfo("resume last running of pipeline started.");
         p.pre_rerun();
+        util::loginfo("finished resume running.");
     }
     if(!a.gensjm){
+        util::loginfo("running pipeline now.");
         p.run_pipe();
+        util::loginfo("pipeline finished.");
     }
 }

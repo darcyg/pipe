@@ -19,6 +19,7 @@
 #include <iostream>
 #include <algorithm>
 #include <functional>
+#include <dirent.h>
 #include <sys/stat.h>
 
 /** utility to operate on strings and directories */
@@ -117,7 +118,7 @@ namespace util{
      * @param des string to be used to replaced with pat
      * @return a string with each pat replaced by des
      */
-    inline std::string replace(const std::string&str, const std::string& pat, const std::string& des){
+    inline std::string replace(const std::string& str, const std::string& pat, const std::string& des){
         std::string ret;
         std::string::size_type las = 0, cur = 0;
         while((cur = str.find(pat, cur)) != std::string::npos){
@@ -480,6 +481,22 @@ namespace util{
         int maxlen = std::min(v1.size(), v2.size());
         for(int i = 0; i < maxlen; ++i){
             vp.push_back(std::make_pair(v1[i], v2[i]));
+        }
+    }
+
+    /** list contents in an directory
+     * @param path string of path
+     * @param vname vector to store contents under path
+     */
+    inline void list_dir(const std::string& path, std::vector<std::string>& vname){
+        std::string dirpath = util::replace(path, "~", std::string(std::getenv("HOME")) + "/");
+        DIR *dir;
+        struct dirent *ent;
+        if((dir = opendir(dirpath.c_str())) != NULL){
+            while((ent = readdir(dir)) != NULL){
+                vname.push_back(std::string(ent->d_name));
+            }
+            closedir(dir);
         }
     }
 }

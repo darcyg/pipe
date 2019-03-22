@@ -11,7 +11,6 @@
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
-#include "tinydir.h"
 #include "util.h"
 
 namespace sjm{

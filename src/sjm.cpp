@@ -126,21 +126,21 @@ void sjm::gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std:
 
 // generate sektk job
 void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
-    if(a.dfq_vol == "VOL"){
-        j.cmd.second = "rm -f " + j.workdir.second + util::basename(lib1);
-        j.cmd.second += " && rm -f " + j.workdir.second + util::basename(lib2);
-        j.cmd.second += " && ln -sf " + lib1 + " " + j.workdir.second;
-        j.cmd.second += " && ln -sf " + lib2 + " " + j.workdir.second;
-    }
-    else{
+    j.cmd.second = "rm -f " + j.workdir.second + util::basename(lib1);
+    j.cmd.second += " && rm -f " + j.workdir.second + util::basename(lib2);
+    j.cmd.second += " && ln -sf " + lib1 + " " + j.workdir.second;
+    j.cmd.second += " && ln -sf " + lib2 + " " + j.workdir.second;
+    if(a.dfq_vol != "VOL"){
         size_t vol = std::atoi(a.dfq_vol.c_str());
         if(vol == 0){
             vol = sjm::get_min_sublib_vol(a);
         }
-        j.cmd.second = a.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + std::to_string(vol);
-        j.cmd.second += " > " + j.workdir.second + util::basename(lib1);
-        j.cmd.second += " && " + a.bin_dir + "/seqtk sample -2 -s 100 " + lib2 + " " + std::to_string(vol);
-        j.cmd.second += " > " + j.workdir.second + util::basename(lib2);
+        if(vol != 0){
+            j.cmd.second = a.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + std::to_string(vol);
+            j.cmd.second += " > " + j.workdir.second + util::basename(lib1);
+            j.cmd.second += " && " + a.bin_dir + "/seqtk sample -2 -s 100 " + lib2 + " " + std::to_string(vol);
+            j.cmd.second += " > " + j.workdir.second + util::basename(lib2);
+        }
     }
     j.memory.second = "1g";
     j.slots.second = "1";
@@ -525,16 +525,17 @@ void sjm::get_status(std::map<std::string, std::string>& jmap, std::string& jfil
 
 // get split sublibrary minimum reads
 size_t sjm::get_min_sublib_vol(const sjm::args& a){
-    tinydir_dir dir;
-    tinydir_open(&dir, a.spl_dir.c_str());
+    std::vector<std::string> fname;
+    util::list_dir(a.spl_dir, fname);
     std::string logfile;
-    while(dir.has_next){
-        tinydir_file file;
-        tinydir_readfile(&dir, &file);
-        logfile = std::string(file.name);
-        if(util::ends_with(logfile, ".spl.log")){
+    for(int i = 0; i < fname.size(); ++i){
+        if(util::ends_with(fname[i], ".spl.log")){
+            logfile = util::joinpath(a.spl_dir, fname[i]);
             break;
         }
+    }
+    if(logfile.empty()){
+        return 0;
     }
     std::ifstream fr(logfile);
     std::string line;
