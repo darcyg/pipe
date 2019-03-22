@@ -11,6 +11,8 @@
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
+#include "tinydir.h"
+#include "util.h"
 
 namespace sjm{
     // sjm specific args
@@ -206,6 +208,8 @@ namespace sjm{
     bool test_job_fail(const std::string& log);
     // get map of stage finish status
     void get_status(std::map<std::string, std::string>& jmap, std::string& jfile);
+    // get split sublibrary minimum reads
+    size_t get_min_sublib_vol(const sjm::args& a);
 }
 
 #endif

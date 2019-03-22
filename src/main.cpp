@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     app.add_option("-r,--ref", a.ref, "reference file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-b,--bed", a.reg, "bed region file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-t,--gset", a.gset, "gene list")->check(CLI::ExistingFile);
-    app.add_option("-v,--vread", a.dfq_vol, "fastq  subset reads number");
+    app.add_option("-v,--vread", a.dfq_vol, "fastq  subset reads number, 0 to use smallest reads num in sublibraries");
     app.add_option("-o,--out", a.out_dir, "output directory");
     app.add_option("-a,--amark", a.ana_marker, "analysis marker range")->check(CLI::Range(a.minstage, a.maxstage));
     app.add_option("-i,--imark", a.ini_marker, "initial analysis marker")->check(CLI::Range(a.minstage, a.maxstage));
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     app.add_flag("-u,--update", a.update, "update command to execute")->needs(prerun);
     CLI_PARSE(app, argc, argv);
      
-    util::make_dirs(a.out_dir);
+    util::makedir(a.out_dir);
     sjm::update_args(a);
     sjm::pipeline p(a.update);
     sjm::init_pipeline(a, p);

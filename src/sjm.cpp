@@ -1,5 +1,4 @@
 #include "sjm.h"
-#include "util.h"
 #include "dirutil.h"
 
 // show stage_marker<->ana_stage relationship
@@ -20,10 +19,10 @@ void sjm::show_mark(){
 
 // update args after commandline args parsed
 void sjm::update_args(sjm::args& a){
-    a.bin_dir = util::get_dirname(dirutil::getExecutablePath()); 
-    a.sample_list = util::get_abspath(a.sample_list);
-    a.out_dir = util::get_abspath(a.out_dir);
-    a.db_dir = util::get_dirname(a.bin_dir) + "/db/";
+    a.bin_dir = util::dirname(dirutil::getExecutablePath()); 
+    a.sample_list = util::abspath(a.sample_list);
+    a.out_dir = util::abspath(a.out_dir);
+    a.db_dir = util::dirname(a.bin_dir) + "/db/";
     if(a.ana_marker.empty()){
         for(int i = a.ini_marker; i <= a.end_marker; ++i){
             a.ana_marker.push_back(i);
@@ -51,18 +50,18 @@ void sjm::update_args(sjm::args& a){
 
 // prepare output sub directories
 void sjm::gen_dir(const sjm::args& a){
-    util::make_dirs(a.sjm_dir);
-    util::make_dirs(a.cut_dir);
-    util::make_dirs(a.spl_dir);
-    util::make_dirs(a.fil_dir);
-    util::make_dirs(a.dfq_dir);
-    util::make_dirs(a.aln_dir);
-    util::make_dirs(a.mkd_dir);
-    util::make_dirs(a.bqc_dir);
-    util::make_dirs(a.fus_dir);
-    util::make_dirs(a.exp_dir);
-    util::make_dirs(a.rep_dir);
-    util::make_dirs(a.log_dir);
+    util::makedir(a.sjm_dir);
+    util::makedir(a.cut_dir);
+    util::makedir(a.spl_dir);
+    util::makedir(a.fil_dir);
+    util::makedir(a.dfq_dir);
+    util::makedir(a.aln_dir);
+    util::makedir(a.mkd_dir);
+    util::makedir(a.bqc_dir);
+    util::makedir(a.fus_dir);
+    util::makedir(a.exp_dir);
+    util::makedir(a.rep_dir);
+    util::makedir(a.log_dir);
 }
 
 // generate fastp job
@@ -121,31 +120,35 @@ void sjm::gen_filtdb_job(const sjm::args& a, const std::string& lib1, const std:
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
     if(a.local){j.host.second = "localhost";}
-    j.o1 = j.workdir.second + util::get_basename(lib1);
-    j.o2 = j.workdir.second + util::get_basename(lib2);
+    j.o1 = j.workdir.second + util::basename(lib1);
+    j.o2 = j.workdir.second + util::basename(lib2);
 }
 
 // generate sektk job
 void sjm::gen_seqtk_job(const sjm::args& a, const std::string& lib1, const std::string& lib2, const std::string& pre, sjm::job& j){
     if(a.dfq_vol == "VOL"){
-        j.cmd.second = "rm -f " + j.workdir.second + util::get_basename(lib1);
-        j.cmd.second += " && rm -f " + j.workdir.second + util::get_basename(lib2);
+        j.cmd.second = "rm -f " + j.workdir.second + util::basename(lib1);
+        j.cmd.second += " && rm -f " + j.workdir.second + util::basename(lib2);
         j.cmd.second += " && ln -sf " + lib1 + " " + j.workdir.second;
         j.cmd.second += " && ln -sf " + lib2 + " " + j.workdir.second;
     }
     else{
-        j.cmd.second = a.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + a.dfq_vol;
-        j.cmd.second += " > " + j.workdir.second + util::get_basename(lib1);
-        j.cmd.second += " && " + a.bin_dir + "/seqtk sample -2 -s 100 " + lib2 + " " + a.dfq_vol;
-        j.cmd.second += " > " + j.workdir.second + util::get_basename(lib2);
+        size_t vol = std::atoi(a.dfq_vol.c_str());
+        if(vol == 0){
+            vol = sjm::get_min_sublib_vol(a);
+        }
+        j.cmd.second = a.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + std::to_string(vol);
+        j.cmd.second += " > " + j.workdir.second + util::basename(lib1);
+        j.cmd.second += " && " + a.bin_dir + "/seqtk sample -2 -s 100 " + lib2 + " " + std::to_string(vol);
+        j.cmd.second += " > " + j.workdir.second + util::basename(lib2);
     }
     j.memory.second = "1g";
     j.slots.second = "1";
     j.sopt.second.append(" -l p=" + j.slots.second);
     j.sopt.second.append(" -l vf=" + j.memory.second);
     if(a.local){j.host.second = "localhost";};
-    j.o1 = j.workdir.second + util::get_basename(lib1);
-    j.o2 = j.workdir.second + util::get_basename(lib2);
+    j.o1 = j.workdir.second + util::basename(lib1);
+    j.o2 = j.workdir.second + util::basename(lib2);
 }
 
 // generate alignment job
@@ -176,11 +179,11 @@ void sjm::gen_align_job(const sjm::args& a, const std::string& lib1, const std::
 void sjm::gen_mkdup_job(const sjm::args& a, const std::string& bam, const std::string& pre, sjm::job& j){
     j.cmd.second += a.bin_dir + "/mkdup";
     j.cmd.second += " -i " + bam;
-    j.cmd.second += " -o " + j.workdir.second + util::get_basename(bam);
+    j.cmd.second += " -o " + j.workdir.second + util::basename(bam);
     j.cmd.second += " > " + j.workdir.second + pre + ".mkdup.log 2>&1";
     j.cmd.second += " && rm -rf " + j.workdir.second + pre + ".mkdup.sort.bam*";
     j.cmd.second += " && " + a.bin_dir + "/samtools sort -@ 8 -o " + j.workdir.second + pre + ".mkdup.sort.bam";
-    j.cmd.second += " " + j.workdir.second + util::get_basename(bam);
+    j.cmd.second += " " + j.workdir.second + util::basename(bam);
     j.cmd.second += " > " + j.workdir.second + pre + ".mkdup.sort.log 2>&1";
     j.cmd.second += " && " + a.bin_dir + "/samtools index ";
     j.cmd.second += j.workdir.second + pre + ".mkdup.sort.bam";
@@ -519,3 +522,35 @@ void sjm::get_status(std::map<std::string, std::string>& jmap, std::string& jfil
     }
     fr.close();
 }
+
+// get split sublibrary minimum reads
+size_t sjm::get_min_sublib_vol(const sjm::args& a){
+    tinydir_dir dir;
+    tinydir_open(&dir, a.spl_dir.c_str());
+    std::string logfile;
+    while(dir.has_next){
+        tinydir_file file;
+        tinydir_readfile(&dir, &file);
+        logfile = std::string(file.name);
+        if(util::ends_with(logfile, ".spl.log")){
+            break;
+        }
+    }
+    std::ifstream fr(logfile);
+    std::string line;
+    std::getline(fr, line);
+    std::vector<size_t> readsNum;
+    std::vector<std::string> vstr;
+    while(std::getline(fr,line)){
+        if(!util::starts_with(line, "Total/Get")){
+            util::split(line, vstr,"\t");
+            readsNum.push_back(std::atoi(vstr[1].c_str()));
+        }
+    }
+    size_t minReadsNum = readsNum[0];
+    for(int i = 1; i < readsNum.size(); ++i){
+        minReadsNum = std::min(minReadsNum, readsNum[i]);
+    }
+    return minReadsNum;
+}
+    

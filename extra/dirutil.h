@@ -523,14 +523,14 @@ int wai_getModulePath(char* out, int capacity, int* dirname_length)
 #include <climits>
 
 namespace dirutil{
-    std::string getExecutablePath(){
+    inline std::string getExecutablePath(){
         int l = wai_getExecutablePath(NULL, 0, NULL);
         char *path = (char*)malloc(l + 1);
         wai_getExecutablePath(path, l, NULL);
         path[l] = '\0';
         return std::string(path);
     }
-    std::string getModulePath(){
+    inline std::string getModulePath(){
         int l = wai_getModulePath(NULL, 0, NULL);
         char *path = (char*)malloc(l + 1);
         wai_getModulePath(path, l, NULL);
