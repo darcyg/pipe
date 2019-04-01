@@ -1,3 +1,6 @@
+#ifndef JOB_H
+#define JOB_H
+
 #include <string>
 #include <utility>
 #include <iostream>
@@ -49,3 +52,5 @@ class Job{
          */
         friend std::ostream& operator<<(std::ostream& os, const Job& j);
 };
+
+#endif

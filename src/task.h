@@ -1,3 +1,6 @@
+#ifndef TASK_H
+#define TASK_H
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -12,7 +15,7 @@ class Task{
 
     public:
         /** default constructor of Task */
-        Task() = default;
+        Task()=default;
 
         /** construct a Task which can hold n stages of jobs
          * @param n stages of this Task
@@ -35,3 +38,5 @@ class Task{
          */
         friend std::ostream& operator<<(std::ostream& os, const Task& t);
 };
+
+#endif

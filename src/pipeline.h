@@ -1,3 +1,6 @@
+#ifndef PIPELINE_H
+#define PIPELINE_H
+
 #include <string>
 #include <vector>
 #include "task.h"
@@ -59,3 +62,5 @@ class Pipeline{
         /** execute Pipeline */
         int runPipeline();
 };
+
+#endif
