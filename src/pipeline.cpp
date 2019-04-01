@@ -21,11 +21,11 @@ Pipeline::~Pipeline(){
     }
 }
 
-void Pipeline::addRunFile(runFile* r, int s, int t){
+void Pipeline::addRunFile(RunTask* r, int s, int t){
     pipelist[s][t].push_back(r);
 }
 
-void Pipeline::preparePipeline(){
+void Pipeline::prepareRerun(){
     std::string oriSJM, newSJM, bakSJM;
     for(auto& e: pipelist){
         for(auto& f: e){
@@ -95,7 +95,7 @@ int Pipeline::runStage(int s){
     return ret;
 }
 
-int Pipeline::runTask(runFile* r){
+int Pipeline::runTask(RunTask* r){
     int ret = std::system(r->sjmCMD.c_str());
     return ret;
 }

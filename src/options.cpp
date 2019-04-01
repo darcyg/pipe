@@ -40,4 +40,37 @@ void Options::updateOptions(){
     ioOpt.exp_dir = ioOpt.out_dir + sep + ioOpt.exp_dir;
     ioOpt.rep_dir = ioOpt.out_dir + sep + ioOpt.rep_dir;
     ioOpt.log_dir = ioOpt.out_dir + sep + ioOpt.log_dir;
+    
+    goodMarkFile = ioOpt.log_dir + "/FAIL";
+    failMarkFile = ioOpt.log_dir + "/SUCCESS";
+}
+
+void Options::genDirectory(){
+    util::makedir(ioOpt.sjm_dir);
+    util::makedir(ioOpt.cut_dir);
+    util::makedir(ioOpt.spl_dir);
+    util::makedir(ioOpt.fil_dir);
+    util::makedir(ioOpt.dfq_dir);
+    util::makedir(ioOpt.aln_dir);
+    util::makedir(ioOpt.mkd_dir);
+    util::makedir(ioOpt.bqc_dir);
+    util::makedir(ioOpt.fus_dir);
+    util::makedir(ioOpt.exp_dir);
+    util::makedir(ioOpt.rep_dir);
+    util::makedir(ioOpt.log_dir);
+}
+
+void Options::showMark(){
+    std::vector<std::string> stg = {"cutadaptor by fastp", "split read by splitr", "filter rrna by filtdb",
+                                    "downsample fastq by seqtk", "genome slignment by bwa", "markdup by mkdp",
+                                    "bam QC by bamqc", "fusion calling by fusionMap", "express quant by kallisto",
+                                    "report by genrep"};
+    std::cout << std::left;
+    std::cout << "  ┌--------------------------------------┐" << std::endl;
+    std::cout << "  |" << std::setw(10) << "Marker" << std::setw(28) << "Analysis" << "|" << std::endl;
+    for(size_t i = 0; i < stg.size(); ++i){
+        std::cout << "  |--------------------------------------|" << std::endl;
+        std::cout << "  |" << std::setw(10) << i + 1 << std::setw(28) << stg[i] << "|" << std::endl;
+    }
+    std::cout << "  └--------------------------------------┘" << std::endl;
 }

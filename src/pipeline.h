@@ -6,7 +6,7 @@
 #include "task.h"
 
 /** struct to store information of a Task */
-struct runFile{
+struct RunTask{
     std::string sjmCMD;       ///< sjm execution command
     std::string failMarkFile; ///< file to touch if this task failed
     std::string goodMarkFile; ///< file to touch if this task succeeded
@@ -17,7 +17,7 @@ struct runFile{
 /** Pipeline class hold a series of Tasks */
 class Pipeline{
     public:
-        std::vector<std::vector<std::vector<runFile*>>> pipelist; ///< stages in pipeline[i] will execute before pipeline[i+1]\n
+        std::vector<std::vector<std::vector<RunTask*>>> pipelist; ///< stages in pipeline[i] will execute before pipeline[i+1]\n
                                                                   ///< tasks in pipeline[i][j] will execute before pipeline[i][j+1]\n
                                                                   ///< all tasks in pipelist[i][j] will execute parallely 
         std::string failMarkFile;                                 ///< file to touch if this pipeline failed
@@ -39,20 +39,20 @@ class Pipeline{
         /** destroy Pipeline */
         ~Pipeline();
 
-        /** add a runFile to pipeline
-         * @param r pointer to a runFile
-         * @param s stage number of pipeline to add this runFile to
-         * @param t substage number of pipeline to add this runFile to
+        /** add a RunTask to pipeline
+         * @param r pointer to a RunTask
+         * @param s stage number of pipeline to add this RunTask to
+         * @param t substage number of pipeline to add this RunTask to
          */
-        void addRunFile(runFile* r, int s, int t);
+        void addRunFile(RunTask* r, int s, int t);
 
-        /** prepare Pipeline to execute */
-        void preparePipeline();
+        /** prepare Pipeline to resume running from last failure */
+        void prepareRerun();
         
         /** runing a Task
-         * @param r pointer to runFile object
+         * @param r pointer to RunTask object
          */
-        int runTask(runFile* r);
+        int runTask(RunTask* r);
 
         /** running a stage of a pipeline
          * @param s stage of pipeline to run

@@ -1,6 +1,7 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <iomanip>
 #include <string>
 #include <vector>
 
@@ -28,17 +29,17 @@ class IODirectoryOptions{
         bin_dir = "./";           
         db_dir = "./";            
         sjm_dir = "00.sjm";       
-        cut_dir = "01.splitread"; 
-        spl_dir = "02.cutadapter";
-        fil_dir = "03.filtdb";    
-        dfq_dir = "04.seqtk";     
+        cut_dir = "01.cutadapter";
+        spl_dir = "02.splitread";
+        dfq_dir = "03.seqtk";     
+        fil_dir = "04.filtdb";    
         aln_dir = "05.alignment"; 
         mkd_dir = "06.markdup";   
         bqc_dir = "07.bamqc";     
         fus_dir = "08.fusion";    
         exp_dir = "09.express";   
         rep_dir = "report";       
-        log_dir = "log";  
+        log_dir = "log";
     }    
 };
 
@@ -86,10 +87,15 @@ class Options{
         IODirectoryOptions ioOpt;         ///< IODirectoryOptions object
         PipeControlOptions clOpt;         ///< PipeControlOptions object
         std::string version = "0.0.0";    ///< pipeline version
+        int nSubPipe = 2;                 ///< total sub pipeline needed
+        std::string goodMarkFile;
+        std::string failMarkFile;
     public:
         Options();
         ~Options();
         void updateOptions();
+        void genDirectory();
+        static void showMark();
 };
 
 #endif

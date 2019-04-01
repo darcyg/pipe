@@ -38,3 +38,23 @@ std::ostream& operator<<(std::ostream& os, const Job& j){
     os << j.end << "\n\n";
     return os;
 }
+
+void Job::getStatus(std::map<std::string, std::string>& jmap, const std::string& jfile){
+    std::pair<std::string, std::string> pjob;
+    std::ifstream fr(jfile);
+    std::istringstream iss;
+    std::string line, prefix, suffix;
+    while(std::getline(fr, line)){
+        iss.clear();
+        iss.str(line);
+        iss >> prefix >> suffix;
+        if(prefix == "name"){
+            pjob.first = suffix;
+        }
+        if(prefix == "status"){
+            pjob.second = suffix;
+            jmap[pjob.first] = pjob.second;
+        }
+    }
+    fr.close();
+}

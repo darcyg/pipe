@@ -13,6 +13,10 @@ void GenJob::setLib(const std::string& l1, const std::string& l2){
     lib2 = l2;
 }
 
+void GenJob::setBam(const std::string& b){
+    bam = b;
+}
+
 void GenJob::genFastpJob(Job* j){
     std::string ofq1 = j->workdir.second + j->pre + ".R1.fq.gz";
     std::string ofq2 = j->workdir.second + j->pre + ".R2.fq.gz";
@@ -97,7 +101,7 @@ void GenJob::genAlignJob(Job* j){
     j->o1 = j->workdir.second + j->pre + ".aln.sort.bam";
 }
 
-void GenJob::genMkdupJob(const std::string& bam, Job* j){
+void GenJob::genMkdupJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/mkdup";
     j->cmd.second += " -i " + bam;
     j->cmd.second += " -o " + j->workdir.second + util::basename(bam);
@@ -117,7 +121,7 @@ void GenJob::genMkdupJob(const std::string& bam, Job* j){
     j->o1 = j->workdir.second + j->pre + ".mkdup.sort.bam";
 }
 
-void GenJob::genBamqcJob(const std::string& bam, Job* j){
+void GenJob::genBamqcJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/bamqc";
     j->cmd.second += " -i " + bam;
     j->cmd.second += " -b " + mOpt->clOpt.reg;

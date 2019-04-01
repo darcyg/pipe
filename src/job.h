@@ -1,8 +1,11 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include <map>
 #include <string>
 #include <utility>
+#include <fstream>
+#include <sstream>
 #include <iostream>
 
 /** Job class to represent a execute unit in sjm control pipeline */
@@ -52,6 +55,12 @@ class Job{
          * @return os reference of std::ostream object
          */
         friend std::ostream& operator<<(std::ostream& os, const Job& j);
+
+        /** get execution status of all jobs in a SJM status file
+         * @param jmap <stage, status> map
+         * @param jfile SJM status file
+         */
+        static void getStatus(std::map<std::string, std::string>& jmap, const std::string& jfile);
 };
 
 #endif

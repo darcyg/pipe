@@ -38,6 +38,7 @@ class FusionMapTemplate{
 class GenJob{
     public:
         Options* mOpt;      ///< pointer to Options object
+        std::string bam;    ///< bam file
         std::string lib1;   ///< fastq read1 file path
         std::string lib2;   ///< fastq read2 file path
     public:
@@ -55,6 +56,11 @@ class GenJob{
          */
         void setLib(const std::string& l1, const std::string& l2);
         
+        /** set bam of GenJob
+         * @param bam bam file path
+         */
+        void setBam(const std::string& b);
+
         /** generate fastp Job
          * @param j pointer to Job
          */
@@ -82,16 +88,14 @@ class GenJob{
         void genAlignJob(Job* j);
         
         /** generate markdup Job
-         * @param bam input bam file path
          * @param j pointer to Job
          */
-        void genMkdupJob(const std::string& bam, Job* j);
+        void genMkdupJob(Job* j);
         
         /** generate bamqc Job
-         * @param bam input bam file path
          * @param j pointer to Job
          */
-        void genBamqcJob(const std::string& bam, Job* j);
+        void genBamqcJob(Job* j);
         
         /** generate fusionmap Job
          * @param j pointer to Job
