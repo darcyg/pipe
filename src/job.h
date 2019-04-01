@@ -23,6 +23,7 @@ class Job{
         std::pair<std::string, std::string> status = {"status", ""};        ///< job running staus marker(job will be passed without executing its cmd if set to done)
         int stage_marker = 0;                                               ///< stage marker of this job
         std::string o1, o2;                                                 ///< store 1/2 output file path generated in this job
+        std::string pre;                                                    ///< prefix used for various filenames generated in this job
     public:
         /** construct a Job object to represent a job
          * @param jname job name

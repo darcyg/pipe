@@ -7,6 +7,7 @@ Job::~Job(){
 }
 
 Job::Job(const std::string& jname, const std::string& jout, const std::string& jpre, const int& jstage){
+    pre = jpre;
     stage_marker = jstage;
     name.second = jname;
     workdir.second = jout + "/";

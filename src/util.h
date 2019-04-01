@@ -396,7 +396,7 @@ namespace util{
      */
     inline int hamming(const std::string& str1, const std::string& str2){
         int diff = std::abs((int)(str1.size() - str2.size()));
-        for(int i = 0; i < std::min(str1.size(), str2.size()); ++i){
+        for(size_t i = 0; i < std::min(str1.size(), str2.size()); ++i){
             diff += (str1[i] == str2[i] ? 0 : 1);
         }
         return diff;

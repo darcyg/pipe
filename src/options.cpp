@@ -2,6 +2,12 @@
 #include "dirutil.h"
 #include "options.h"
 
+Options::Options(){
+}
+
+Options::~Options(){
+}
+
 void Options::updateOptions(){
     clOpt.sample_list = util::abspath(clOpt.sample_list);
     if(clOpt.ana_marker.empty()){

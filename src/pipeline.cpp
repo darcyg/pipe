@@ -27,14 +27,14 @@ void Pipeline::addRunFile(runFile* r, int s, int t){
 
 void Pipeline::preparePipeline(){
     std::string oriSJM, newSJM, bakSJM;
-    for(int i = 0; i < pipelist.size(); ++i){
-        for(int j = 0; j < pipelist[i].size(); ++j){
-            for(auto& e: pipelist[i][j]){
-                remove(e->failMarkFile.c_str());
-                remove(e->goodMarkFile.c_str());
-                remove(e->logFile.c_str());
-                auto p = e->sjmCMD.find_last_of(" ");
-                oriSJM = e->sjmCMD.substr(p + 1);
+    for(auto& e: pipelist){
+        for(auto& f: e){
+            for(auto& g: f){
+                remove(g->failMarkFile.c_str());
+                remove(g->goodMarkFile.c_str());
+                remove(g->logFile.c_str());
+                auto p = g->sjmCMD.find_last_of(" ");
+                oriSJM = g->sjmCMD.substr(p + 1);
                 newSJM = oriSJM + ".status";
                 bakSJM = newSJM + ".bak";
                 remove(bakSJM.c_str());
@@ -52,7 +52,7 @@ void Pipeline::preparePipeline(){
 
 int Pipeline::runPipeline(){
     std::vector<std::future<int>> fv;
-    for(int i = 0; i < pipelist.size(); ++i){
+    for(size_t i = 0; i < pipelist.size(); ++i){
         fv.push_back(std::async(std::launch::async, &Pipeline::runStage, this, i));
     }
     for(auto& e: fv){
@@ -73,12 +73,12 @@ int Pipeline::runPipeline(){
 int Pipeline::runStage(int s){
     int ret = 0;
     std::vector<std::future<int>> fv;
-    for(int i = 0; i < pipelist[s].size(); ++i){
+    for(size_t i = 0; i < pipelist[s].size(); ++i){
         fv.clear();
-        for(int j = 0; j < pipelist[s][i].size(); ++j){
+        for(size_t j = 0; j < pipelist[s][i].size(); ++j){
             fv.push_back(std::async(std::launch::async, &Pipeline::runTask, this, std::ref(pipelist[s][i][j])));
         }
-        for(int k = 0; k < fv.size(); ++k){
+        for(size_t k = 0; k < fv.size(); ++k){
             pipelist[s][i][k]->retValue = fv[k].get();
             if(pipelist[s][i][k]->retValue){
                 remove(pipelist[s][i][k]->goodMarkFile.c_str());

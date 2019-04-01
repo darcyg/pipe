@@ -5,11 +5,11 @@ Task::Task(int j){
 }
 
 Task::~Task(){
-    for(int i = 0; i < joblist.size(); ++i){
-        for(int j = 0; j < joblist[i].size(); ++j){
-            if(joblist[i][j]){
-                delete joblist[i][j];
-                joblist[i][j] = NULL;
+    for(auto& e: joblist){
+        for(auto& f: e){
+            if(f){
+                delete f;
+                f = NULL;
             }
         }
     }
