@@ -88,13 +88,21 @@ class Options{
         PipeControlOptions clOpt;         ///< PipeControlOptions object
         std::string version = "0.0.0";    ///< pipeline version
         int nSubPipe = 2;                 ///< total sub pipeline needed
-        std::string goodMarkFile;
-        std::string failMarkFile;
+        std::string goodMarkFile;         ///< pipeline success markfile
+        std::string failMarkFile;         ///< pipeline failure markfile
     public:
+        /** construct a Options object */
         Options();
+        /** destroy a Options object */
         ~Options();
+
+        /** update Options after commandline arguments parse */
         void updateOptions();
+
+        /** generate subdirectories */
         void genDirectory();
+
+        /** show marker help info of each stage */
         static void showMark();
 };
 

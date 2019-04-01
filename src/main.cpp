@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     app.add_option("-r,--ref", opt->clOpt.ref, "reference file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-b,--bed", opt->clOpt.reg, "bed region file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-t,--gset", opt->clOpt.gset, "gene list")->check(CLI::ExistingFile);
-    app.add_option("-v,--vread", opt->clOpt.dfq_vol, "fastq  subset reads number, 0 to use smallest reads num in sublibraries");
+    app.add_option("-v,--vread", opt->clOpt.dfq_vol, "fastq subset reads number");
     app.add_option("-o,--out", opt->ioOpt.out_dir, "output directory");
     app.add_option("-a,--amark", opt->clOpt.ana_marker, "analysis marker range")->check(CLI::Range(opt->clOpt.minstage, opt->clOpt.maxstage));
     app.add_option("-i,--imark", opt->clOpt.ini_marker, "initial analysis marker")->check(CLI::Range(opt->clOpt.minstage, opt->clOpt.maxstage));
