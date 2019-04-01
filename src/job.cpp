@@ -15,7 +15,7 @@ Job::Job(const std::string& jname, const std::string& jout, const std::string& j
     sopt.second.append(" -e " + sgee + " -o " + sgeo);
 }
 
-std::ostream& Job::append_item(std::ostream& os, const std::pair<std::string, std::string>& item){
+std::ostream& Job::appendItem(std::ostream& os, const std::pair<std::string, std::string>& item){
     if(item.second.empty()){
         return os;
     }else{
@@ -28,12 +28,12 @@ std::ostream& operator<<(std::ostream& os, const Job& j){
     os << j.begin << "\n";
     os << "  " << j.name.first << " " << j.name.second << "\n";
     os << "  " << j.cmd.first << " " << j.cmd.second << "\n";
-    j.append_item(os, j.queue);
-    j.append_item(os, j.envexp);
-    j.append_item(os, j.workdir);
-    j.append_item(os, j.status);
-    j.append_item(os, j.sopt);
-    j.append_item(os, j.host);
+    j.appendItem(os, j.queue);
+    j.appendItem(os, j.envexp);
+    j.appendItem(os, j.workdir);
+    j.appendItem(os, j.status);
+    j.appendItem(os, j.sopt);
+    j.appendItem(os, j.host);
     os << j.end << "\n\n";
     return os;
 }

@@ -43,7 +43,7 @@ class Job{
          * @param item an <string, string> pair item in Job
          * @return os reference to std::ostream
          */
-        static std::ostream& append_item(std::ostream& os, const std::pair<std::string, std::string>& item);
+        static std::ostream& appendItem(std::ostream& os, const std::pair<std::string, std::string>& item);
         
         /** output sjm executing unit control information of a Job to ostream
          * @param os reference of std::ostream object
