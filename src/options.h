@@ -46,21 +46,21 @@ class IODirectoryOptions{
 /** class to store pipeline execution control options */
 class PipeControlOptions{
     public:
-        int minstage;                /// < minimum stages this pipeline supports
-        int maxstage;                /// < maximum stages this pipeline supports
-        std::string sample_list;     /// < sample list path
-        std::string ref;             /// < reference fasta file path
-        std::string reg;             /// < region bed file path
-        std::string gset;            /// < gene set tsv file path
-        std::string queue;           /// < sge queue name
-        std::vector<int> ana_marker; /// < analysis marker number
-        int ini_marker;              /// < starting analysis stage marker
-        int end_marker;              /// < ending analysis stage marker
-        std::string dfq_vol;         /// < fastq reads number to downsample to
-        bool rerun;                  /// < resume running from last failing if true
-        bool local;                  /// < running pipeline in local server if true
-        bool gensjm;                 /// < only generate sjm control files without running pipeline if true
-        bool update;                 /// < update sjm control file before running pipeline if true
+        int minstage;                ///< minimum stages this pipeline supports
+        int maxstage;                ///< maximum stages this pipeline supports
+        std::string sample_list;     ///< sample list path
+        std::string ref;             ///< reference fasta file path
+        std::string reg;             ///< region bed file path
+        std::string gset;            ///< gene set tsv file path
+        std::string queue;           ///< sge queue name
+        std::vector<int> ana_marker; ///< analysis marker number
+        int ini_marker;              ///< starting analysis stage marker
+        int end_marker;              ///< ending analysis stage marker
+        std::string dfq_vol;         ///< fastq reads number to downsample to
+        bool rerun;                  ///< resume running from last failing if true
+        bool local;                  ///< running pipeline in local server if true
+        bool gensjm;                 ///< only generate sjm control files without running pipeline if true
+        bool update;                 ///< update sjm control file before running pipeline if true
 
     PipeControlOptions(){
         minstage = 1;
