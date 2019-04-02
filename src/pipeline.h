@@ -31,7 +31,7 @@ class Pipeline{
 
         /** construct a Pipeline which have n stages
          * @param n stages of Pipeline
-         * @param s maximum substages of each subpipeline
+         * @param s substages of each subpipeline
          * @param fmkf fail marker file of Pipeline
          * @param smkf success marker file of Pipeline
          */

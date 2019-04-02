@@ -84,13 +84,13 @@ class PipeControlOptions{
 /** struct to store various  options of pipeline */
 class Options{
     public:
-        IODirectoryOptions ioOpt;         ///< IODirectoryOptions object
-        PipeControlOptions clOpt;         ///< PipeControlOptions object
-        std::string version = "0.0.0";    ///< pipeline version
-        int nSubPipe = 2;                 ///< total sub pipeline needed
-        int nSamples = 0;                 ///< total samples/sub libraries
-        std::string goodMarkFile;         ///< pipeline success markfile
-        std::string failMarkFile;         ///< pipeline failure markfile
+        IODirectoryOptions ioOpt;            ///< IODirectoryOptions object
+        PipeControlOptions clOpt;            ///< PipeControlOptions object
+        std::string version = "0.0.0";       ///< pipeline version
+        int nSubPipe = 2;                    ///< total sub pipeline needed
+        int nSamples = 0;                    ///< total samples to execute
+        std::string goodMarkFile;            ///< pipeline success markfile
+        std::string failMarkFile;            ///< pipeline failure markfile
     public:
         /** construct a Options object */
         Options();

@@ -43,17 +43,11 @@ void Options::updateOptions(){
 
     std::ifstream fr(clOpt.sample_list);
     std::string line;
-    std::vector<std::string> vec;
-    std::getline(fr, line);
-    std::getline(fr, line);
-    util::split(line, vec, "\t");
-    fr.close();
-    fr.open(vec[5].c_str());
     int count = 0;
     while(std::getline(fr, line)){
         ++count;
     }
-    nSamples = count + 1;
+    nSamples = count;
     goodMarkFile = ioOpt.log_dir + "/FAIL";
     failMarkFile = ioOpt.log_dir + "/SUCCESS";
 }
