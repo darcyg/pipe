@@ -48,8 +48,8 @@ void Options::updateOptions(){
         ++count;
     }
     nSamples = count;
-    goodMarkFile = ioOpt.log_dir + "/FAIL";
-    failMarkFile = ioOpt.log_dir + "/SUCCESS";
+    goodMarkFile = ioOpt.log_dir + "/SUCCESS";
+    failMarkFile = ioOpt.log_dir + "/FAIL";
 }
 
 void Options::genDirectory(){
