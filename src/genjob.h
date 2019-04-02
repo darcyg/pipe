@@ -13,13 +13,24 @@ class FusionMapTemplate{
         std::string outdir;        ///< output path
         std::string pre;           ///< prefix of output file names
         
+        /** construct a FusionMapTemplate
+         * @param r1 fastq read1 path
+         * @param r2 fastq read2 path
+         * @param otd output path
+         * @param pr prefix of output filenames
+         */ 
         FusionMapTemplate(const std::string& r1, const std::string r2, const std::string& otd, const std::string& pr){
             fq1 = r1;
             fq2 = r2;
             outdir = otd;
             pre = pr;
         }
-        
+       
+        /** output FusionMapTemplate object to ostream
+         * @param os reference of std::ostream
+         * @param f reference of FusionMapTemplate object
+         * @return reference of std::ostream
+         */ 
         friend std::ostream& operator<<(std::ostream& os, const FusionMapTemplate& f){
             os << "<Files>\n";
             os << f.fq1 << "\n" << f.fq2 << "\n\n";
@@ -57,7 +68,7 @@ class GenJob{
         void setLib(const std::string& l1, const std::string& l2);
         
         /** set bam of GenJob
-         * @param bam bam file path
+         * @param b bam file path
          */
         void setBam(const std::string& b);
 
