@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     util::loginfo("arguments updated.", logmtx);
     
     util::loginfo("construct pipeline object.", logmtx);
-    Pipeline* p = new Pipeline(opt->nSubPipe, opt->failMarkFile, opt->goodMarkFile);
+    Pipeline* p = new Pipeline(opt->nSubPipe, opt->nSamples, opt->failMarkFile, opt->goodMarkFile);
     util::loginfo("pipeline object construced.", logmtx);
     
     util::loginfo("generate subdirectories.", logmtx);

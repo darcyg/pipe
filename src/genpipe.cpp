@@ -18,8 +18,13 @@ void GenPipe::genPrelibPipe(){
         iss.clear();
         iss.str(tmpStr);
         iss >> sampleNo >> flowCell >> libName >> read1 >> read2 >> barcodeConf;
+        GenJob* genJob = new GenJob(mOpt);
         Job* jFastp = new Job("fastp", mOpt->ioOpt.cut_dir, libName, 1);
+        genJob->setLib(read1, read2);
+        genJob->genFastpJob(jFastp);
         Job* jSplitr = new Job("splitr", mOpt->ioOpt.spl_dir, libName, 2);
+        genJob->setLib(jFastp->o1, jFastp->o2);
+        genJob->genSplitrJob(barcodeConf, jSplitr);
         Task* task = new Task(2);
         task->addJob(jFastp, 0);
         task->addJob(jSplitr, 1);
@@ -122,8 +127,8 @@ void GenPipe::genAnalibTask(){
                     }
                 }
             }
-            std::string sjmFile(mOpt->ioOpt.sjm_dir + "/" + subLib + " _analib.sjm");
-            std::string sjmLog(mOpt->ioOpt.sjm_dir + "/" + subLib + " _analib.log");
+            std::string sjmFile(mOpt->ioOpt.sjm_dir + "/" + subLib + "_analib.sjm");
+            std::string sjmLog(mOpt->ioOpt.sjm_dir + "/" + subLib + "_analib.log");
             RunTask* runTask = new RunTask();
             runTask->sjmCMD = mOpt->ioOpt.bin_dir + "/sjm -i -l " + sjmLog + " " + sjmFile;
             runTask->goodMarkFile = mOpt->ioOpt.log_dir + "/" + subLib + ".Analysis.SUCCESS";

@@ -31,10 +31,11 @@ class Pipeline{
 
         /** construct a Pipeline which have n stages
          * @param n stages of Pipeline
+         * @param s maximum substages of each subpipeline
          * @param fmkf fail marker file of Pipeline
          * @param smkf success marker file of Pipeline
          */
-        Pipeline(int n, const std::string& fmkf, const std::string& smkf);
+        Pipeline(int n, int s, const std::string& fmkf, const std::string& smkf);
 
         /** destroy Pipeline */
         ~Pipeline();

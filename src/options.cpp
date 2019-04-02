@@ -40,7 +40,20 @@ void Options::updateOptions(){
     ioOpt.exp_dir = ioOpt.out_dir + sep + ioOpt.exp_dir;
     ioOpt.rep_dir = ioOpt.out_dir + sep + ioOpt.rep_dir;
     ioOpt.log_dir = ioOpt.out_dir + sep + ioOpt.log_dir;
-    
+
+    std::ifstream fr(clOpt.sample_list);
+    std::string line;
+    std::vector<std::string> vec;
+    std::getline(fr, line);
+    std::getline(fr, line);
+    util::split(line, vec, "\t");
+    fr.close();
+    fr.open(vec[5].c_str());
+    int count = 0;
+    while(std::getline(fr, line)){
+        ++count;
+    }
+    nSamples = count + 1;
     goodMarkFile = ioOpt.log_dir + "/FAIL";
     failMarkFile = ioOpt.log_dir + "/SUCCESS";
 }

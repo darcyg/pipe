@@ -35,6 +35,28 @@ void GenJob::genFastpJob(Job* j){
     j->o2 = ofq2;
 }
 
+void GenJob::genSplitrJob(const std::string& conf, Job* j){
+    j->cmd.second += mOpt->ioOpt.bin_dir + "/splitr";
+    j->cmd.second += " -b " + mOpt->ioOpt.db_dir + "/barcode/barcode.conf";
+    j->cmd.second += " -s " + conf;
+    j->cmd.second += " -r " + lib1;
+    j->cmd.second += " -R " + lib2;
+    j->cmd.second += " -o " + j->workdir.second;
+    j->cmd.second += " -p " + j->pre;
+    j->memory.second = "4g";
+    int count = 0;
+    std::ifstream fr(conf.c_str());
+    std::string tmpstr;
+    while(std::getline(fr, tmpstr)){
+        ++count;
+    }
+    fr.close();
+    j->slots.second = std::to_string(count + 2);
+    j->sopt.second.append(" -l p=" + j->slots.second);
+    j->sopt.second.append(" -l vf=" + j->memory.second);
+    if(mOpt->clOpt.local){j->host.second = "localhost";};
+}
+
 void GenJob::genSeqtkJob(Job* j){
     j->cmd.second = "rm -f " + j->workdir.second + util::basename(lib1);
     j->cmd.second += " && rm -f " + j->workdir.second + util::basename(lib2);

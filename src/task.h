@@ -37,6 +37,16 @@ class Task{
          * @return os reference of a std::ostream object
          */
         friend std::ostream& operator<<(std::ostream& os, const Task& t);
+
+        /** operator to output a Task into a sjm control file
+         * @param os reference of a std::ostream object
+         * @param t pointer to a Task object
+         * @return os reference of a std::ostream object
+         */
+        friend std::ostream& operator<<(std::ostream& os, const Task* t){
+            os << (*t);
+            return os;
+        }
 };
 
 #endif

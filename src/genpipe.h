@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 #include "job.h"
 #include "task.h"
 #include "pipeline.h"

@@ -55,6 +55,16 @@ class Job{
          * @return os reference of std::ostream object
          */
         friend std::ostream& operator<<(std::ostream& os, const Job& j);
+        
+        /** output sjm executing unit control information of a Job to ostream
+         * @param os reference of std::ostream object
+         * @param j pointer to a Job object
+         * @return os reference of std::ostream object
+         */
+        friend std::ostream& operator<<(std::ostream& os, const Job* j){
+            os << (*j);
+            return os;
+        }
 
         /** get execution status of all jobs in a SJM status file
          * @param jmap <stage, status> map
