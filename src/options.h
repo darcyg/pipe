@@ -31,8 +31,8 @@ class IODirectoryOptions{
         sjm_dir = "00.sjm";       
         cut_dir = "01.cutadapter";
         spl_dir = "02.splitread";
-        dfq_dir = "03.seqtk";     
-        fil_dir = "04.filtdb";    
+        fil_dir = "03.filtdb";    
+        dfq_dir = "04.seqtk";     
         aln_dir = "05.alignment"; 
         mkd_dir = "06.markdup";   
         bqc_dir = "07.bamqc";     

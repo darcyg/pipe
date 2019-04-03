@@ -68,8 +68,8 @@ void Options::genDirectory(){
 }
 
 void Options::showMark(){
-    std::vector<std::string> stg = {"cutadaptor by fastp", "split read by splitr", "downsample fastq by seqtk",
-                                    "filter rrna by filtdb", "genome slignment by bwa", "markdup by mkdp",
+    std::vector<std::string> stg = {"cutadaptor by fastp", "split read by splitr", "filter rrna by filtdb",
+                                    "downsample fastq by seqtk", "genome slignment by bwa", "markdup by mkdp",
                                     "bam QC by bamqc", "fusion calling by fusionMap", "express quant by kallisto",
                                     "report by genrep"};
     std::cout << std::left;

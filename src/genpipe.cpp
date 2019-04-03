@@ -80,37 +80,46 @@ void GenPipe::genAnalibTask(){
             subRead2 = mOpt->ioOpt.spl_dir + "/" + subLib + ".R2.fq";
             GenJob* genJob = new GenJob(mOpt);
             Task* task = new Task(6);
-            Job* jSeqtk = new Job("seqtk", mOpt->ioOpt.dfq_dir, subLib, 4);
-            genJob->setLib(subRead1, subRead2);
-            genJob->genSeqtkJob(jSeqtk);
-            task->addJob(jSeqtk, 0);
+            // filtdb
             Job* jFiltdb = new Job("filtdb", mOpt->ioOpt.fil_dir, subLib, 3);
-            genJob->setLib(jSeqtk->o1, jSeqtk->o2);
+            genJob->setLib(subRead1, subRead2);
             genJob->genFiltdbJob(jFiltdb);
-            task->addJob(jFiltdb, 1); 
-            Job* jAln = new Job("bwa", mOpt->ioOpt.aln_dir, subLib, 5);
+            task->addJob(jFiltdb, 0); 
+            // seqtk
+            Job* jSeqtk = new Job("seqtk", mOpt->ioOpt.dfq_dir, subLib, 4);
             genJob->setLib(jFiltdb->o1, jFiltdb->o2);
+            genJob->genSeqtkJob(jSeqtk);
+            task->addJob(jSeqtk, 1);
+            // bwa mem
+            Job* jAln = new Job("bwa", mOpt->ioOpt.aln_dir, subLib, 5);
+            genJob->setLib(jSeqtk->o1, jSeqtk->o2);
             genJob->genAlignJob(jAln);
             task->addJob(jAln, 2);
+            // mkdup
             Job* jMkdup = new Job("mkdup", mOpt->ioOpt.mkd_dir, subLib, 6);
             genJob->setBam(jAln->o1);
             genJob->genMkdupJob(jMkdup);
             task->addJob(jMkdup, 3);
+            // bamqc
             Job* jBamqc = new Job("bamqc", mOpt->ioOpt.bqc_dir, subLib, 7);
             genJob->setBam(jMkdup->o1);
             genJob->genBamqcJob(jBamqc);
             task->addJob(jBamqc, 4);
+            // fusion
             Job* jFusion = new Job("fusionmap", mOpt->ioOpt.fus_dir, subLib, 8);
             genJob->setLib(jSeqtk->o1, jSeqtk->o2);
             genJob->genFusionJob(jFusion);
             task->addJob(jFusion, 2);
+            // express
             Job* jExpress = new Job("kallisto", mOpt->ioOpt.exp_dir, subLib, 9);
             genJob->setLib(jSeqtk->o1, jSeqtk->o2);
             genJob->genExpressJob(jExpress);
             task->addJob(jExpress, 2);
+            // report
             Job* jReport = new Job("genrpt", mOpt->ioOpt.rep_dir, subLib, 10);
             genJob->genReportJob(jReport);
             task->addJob(jReport, 5);
+            // updating status
             std::string sjmStatus = mOpt->ioOpt.sjm_dir + "/" + subLib + "_analib.sjm.status";
             std::map<std::string, std::string> jMap;
             Job::getStatus(jMap, sjmStatus);

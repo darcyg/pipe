@@ -68,7 +68,9 @@ void GenJob::genSeqtkJob(Job* j){
             vol = getMinFqVol();
         }
         if(vol != 0){
-            j->cmd.second = mOpt->ioOpt.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + std::to_string(vol);
+            j->cmd.second = "rm -f " + j->workdir.second + util::basename(lib1);
+            j->cmd.second += " && rm -f " + j->workdir.second + util::basename(lib2);
+            j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/seqtk sample -2 -s 100 " + lib1 + " " + std::to_string(vol);
             j->cmd.second += " > " + j->workdir.second + util::basename(lib1);
             j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/seqtk sample -2 -s 100 " + lib2 + " " + std::to_string(vol);
             j->cmd.second += " > " + j->workdir.second + util::basename(lib2);
@@ -207,26 +209,23 @@ void GenJob::genReportJob(Job* j){
 
 size_t GenJob::getMinFqVol(){
     std::vector<std::string> fname;
-    util::list_dir(mOpt->ioOpt.spl_dir, fname);
+    util::list_dir(mOpt->ioOpt.fil_dir, fname);
     std::string logfile;
-    for(size_t i = 0; i < fname.size(); ++i){
-        if(util::ends_with(fname[i], ".spl.log")){
-            logfile = util::joinpath(mOpt->ioOpt.spl_dir, fname[i]);
-            break;
-        }
-    }
-    if(logfile.empty()){
-        return 0;
-    }
-    std::ifstream fr(logfile);
-    std::string line;
-    std::getline(fr, line);
     std::vector<size_t> readsNum;
-    std::vector<std::string> vstr;
-    while(std::getline(fr,line)){
-        if(!util::starts_with(line, "Total/Get")){
-            util::split(line, vstr,"\t");
-            readsNum.push_back(std::atoi(vstr[1].c_str()));
+    for(size_t i = 0; i < fname.size(); ++i){
+        if(util::ends_with(fname[i], ".filt.log")){
+            logfile = util::joinpath(mOpt->ioOpt.fil_dir, fname[i]);
+            std::ifstream fr(logfile);
+            std::string line;
+            std::vector<std::string> vstr;
+            std::getline(fr, line);
+            util::split(line, vstr, " ");
+            int totReads = std::atoi(vstr[2].c_str());
+            std::getline(fr, line);
+            util::split(line, vstr, " ");
+            int filtReads = std::atoi(vstr[3].c_str());
+            readsNum.push_back(totReads - filtReads);
+            fr.close();
         }
     }
     size_t minReadsNum = readsNum[0];
