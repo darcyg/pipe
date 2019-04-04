@@ -50,6 +50,53 @@ void Options::updateOptions(){
     nSamples = count;
     goodMarkFile = ioOpt.log_dir + "/SUCCESS";
     failMarkFile = ioOpt.log_dir + "/FAIL";
+    if(clOpt.dfq_vol == "0"){
+        updateMinFqVolMap();
+    }
+}
+
+void Options::updateMinFqVolMap(){
+    std::string line;
+    std::vector<std::string> vstr;
+    std::ifstream fr(clOpt.sample_list);
+    std::getline(fr, line);
+    while(std::getline(fr, line)){
+        util::split(line, vstr, "\t");
+        minFqVolMap[vstr[0]] = getMinFqVolOfOnePool(vstr[vstr.size() - 1]);
+    }
+}
+
+size_t Options::getMinFqVolOfOnePool(const std::string& conf){
+    if(!util::exists(conf)){
+        util::error_exit("configure file \"" + conf + "\" does not existd!\n");
+    }
+    std::vector<size_t> readsNum;
+    std::ifstream fr(conf);
+    std::string logfile, line, libName;
+    std::istringstream iss;
+    while(std::getline(fr, line)){
+        iss.clear();
+        iss.str(line);
+        iss >> libName;
+        logfile = util::joinpath(ioOpt.fil_dir, libName + ".filt.log");
+        std::ifstream fr1(logfile);
+        std::string confLine;
+        std::vector<std::string> vstr;
+        std::getline(fr1, confLine);
+        util::split(confLine, vstr, " ");
+        int totReads = std::atoi(vstr[2].c_str());
+        std::getline(fr1, confLine);
+        util::split(confLine, vstr, " ");
+        int filtReads = std::atoi(vstr[3].c_str());
+        readsNum.push_back(totReads - filtReads);
+        fr1.close();
+    }
+    size_t minReadsNum = readsNum[0];
+    for(size_t i = 1; i < readsNum.size(); ++i){
+        minReadsNum = std::min(minReadsNum, readsNum[i]);
+    }
+    fr.close();
+    return minReadsNum;
 }
 
 void Options::genDirectory(){

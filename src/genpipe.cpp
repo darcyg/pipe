@@ -87,6 +87,7 @@ void GenPipe::genAnalibTask(){
             task->addJob(jFiltdb, 0); 
             // seqtk
             Job* jSeqtk = new Job("seqtk", mOpt->ioOpt.dfq_dir, subLib, 4);
+            jSeqtk->optPre = sampleNo;
             genJob->setLib(jFiltdb->o1, jFiltdb->o2);
             genJob->genSeqtkJob(jSeqtk);
             task->addJob(jSeqtk, 1);

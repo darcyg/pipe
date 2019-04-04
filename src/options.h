@@ -1,9 +1,13 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <map>
+#include "util.h"
 
 /** struct to store input/output diecttory Options */
 class IODirectoryOptions{
@@ -84,13 +88,14 @@ class PipeControlOptions{
 /** struct to store various  options of pipeline */
 class Options{
     public:
-        IODirectoryOptions ioOpt;            ///< IODirectoryOptions object
-        PipeControlOptions clOpt;            ///< PipeControlOptions object
-        std::string version = "0.0.0";       ///< pipeline version
-        int nSubPipe = 2;                    ///< total sub pipeline needed
-        int nSamples = 0;                    ///< total samples to execute
-        std::string goodMarkFile;            ///< pipeline success markfile
-        std::string failMarkFile;            ///< pipeline failure markfile
+        IODirectoryOptions ioOpt;                  ///< IODirectoryOptions object
+        PipeControlOptions clOpt;                  ///< PipeControlOptions object
+        std::string version = "0.0.0";             ///< pipeline version
+        std::map<std::string, size_t> minFqVolMap; ///< minimum fastq volume(reads number) of sublibraries of each pooled library after filter db
+        int nSubPipe = 2;                          ///< total sub pipeline needed
+        int nSamples = 0;                          ///< total samples to execute
+        std::string goodMarkFile;                  ///< pipeline success markfile
+        std::string failMarkFile;                  ///< pipeline failure markfile
     public:
         /** construct a Options object */
         Options();
@@ -99,6 +104,15 @@ class Options{
 
         /** update Options after commandline arguments parse */
         void updateOptions();
+
+        /** update minFqVolMap for down sample fastq to samve volume in each pooled library after filter db */
+        void updateMinFqVolMap();
+
+        /** get minimum fastq volume(reads number) of sublibraries of one pooled library after filter db
+         * @param conf barcode fonfigure file which contains sublibrary name in column 1
+         * @return minimum fastq volume(reads number) of sublibraries of one pooled library after filter db
+         */
+        size_t getMinFqVolOfOnePool(const std::string& conf);
 
         /** generate subdirectories */
         void genDirectory();

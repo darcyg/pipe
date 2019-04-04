@@ -122,11 +122,6 @@ class GenJob{
          * @param j pointer to Job
          */
         void genReportJob(Job* j);
-        
-        /** get minimum reads number of fastq in split libraries from a common library
-         * @return minimum reads number of fastq in split libraries
-         */
-        size_t getMinFqVol();
 };
 
 #endif

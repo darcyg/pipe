@@ -28,6 +28,7 @@ class Job{
         std::string o1;                                                     ///< output 1 file path generated in this job
         std::string o2;                                                     ///< output 2 file path generated in this job
         std::string pre;                                                    ///< prefix used for various filenames generated in this job
+        std::string optPre;                                                 ///< optional prefix used in downsample
     public:
         /** construct a Job object to represent a job
          * @param jname job name

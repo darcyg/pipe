@@ -65,7 +65,7 @@ void GenJob::genSeqtkJob(Job* j){
     if(mOpt->clOpt.dfq_vol != "VOL"){
         size_t vol = std::atoi(mOpt->clOpt.dfq_vol.c_str());
         if(vol == 0){
-            vol = getMinFqVol();
+            vol = mOpt->minFqVolMap[j->optPre];
         }
         if(vol != 0){
             j->cmd.second = "rm -f " + j->workdir.second + util::basename(lib1);
@@ -205,32 +205,4 @@ void GenJob::genReportJob(Job* j){
     j->sopt.second.append(" -l p=" + j->slots.second);
     j->sopt.second.append(" -l vf=" + j->memory.second);
     if(mOpt->clOpt.local){j->host.second = "localhost";}
-}
-
-size_t GenJob::getMinFqVol(){
-    std::vector<std::string> fname;
-    util::list_dir(mOpt->ioOpt.fil_dir, fname);
-    std::string logfile;
-    std::vector<size_t> readsNum;
-    for(size_t i = 0; i < fname.size(); ++i){
-        if(util::ends_with(fname[i], ".filt.log")){
-            logfile = util::joinpath(mOpt->ioOpt.fil_dir, fname[i]);
-            std::ifstream fr(logfile);
-            std::string line;
-            std::vector<std::string> vstr;
-            std::getline(fr, line);
-            util::split(line, vstr, " ");
-            int totReads = std::atoi(vstr[2].c_str());
-            std::getline(fr, line);
-            util::split(line, vstr, " ");
-            int filtReads = std::atoi(vstr[3].c_str());
-            readsNum.push_back(totReads - filtReads);
-            fr.close();
-        }
-    }
-    size_t minReadsNum = readsNum[0];
-    for(size_t i = 1; i < readsNum.size(); ++i){
-        minReadsNum = std::min(minReadsNum, readsNum[i]);
-    }
-    return minReadsNum;
 }
