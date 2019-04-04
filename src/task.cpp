@@ -34,7 +34,9 @@ std::ostream& operator<<(std::ostream& os, const Task& t){
     for(size_t i = 1; i < t.joblist.size(); ++i){
         for(auto& e: t.joblist[i-1]){
             for(auto& f: t.joblist[i]){
-                os << "order  " << e->name.second << " before " << f->name.second << "\n";
+                if(e->status.second != "done" && f->status.second != "done"){
+                    os << "order  " << e->name.second << " before " << f->name.second << "\n";
+                }
             }
         }
     }

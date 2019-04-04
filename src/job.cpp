@@ -26,6 +26,9 @@ std::ostream& Job::appendItem(std::ostream& os, const std::pair<std::string, std
 }
 
 std::ostream& operator<<(std::ostream& os, const Job& j){
+    if(j.status.second == "done"){
+        return os;
+    }
     os << j.begin << "\n";
     os << "  " << j.name.first << " " << j.name.second << "\n";
     os << "  " << j.cmd.first << " " << j.cmd.second << "\n";
