@@ -38,8 +38,9 @@ Installation
 
 PS  
 this is a sjm based fusion pipeline  
-|Marker|Analysis         |Software |Version     
-|------|-----------------|---------|-----------  
+
+|Marker|Analysis         |Software |Version
+|------|-----------------|---------|----------- 
 |1     |split read       |spliter  |0.0.0       
 |2     |cutadapter and qc|fqtool   |0.0.0       
 |3     |filter rrna      |filter   |0.0.0       
