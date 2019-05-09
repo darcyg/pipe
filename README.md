@@ -38,17 +38,15 @@ Installation
 
 PS  
 this is a sjm based fusion pipeline  
-the relation between analysis marker and content is listed below  
-
-|Marker   |Analysis                     
-|---------|----------------------------
-|1        | cutadaptor by fastp         
-|2        | split read by splitr        
-|3        | filter rrna by filtdb       
-|4        | downsample fastq by seqtk   
-|5        | genome slignment by bwa     
-|6        | markdup by mkdp             
-|7        | bam QC by bamqc             
-|8        | fusion calling by fusionMap 
-|9        | express quant by kallisto   
-|10       | report by genrep            
+|Marker|Analysis         |Software |Version     |  
+|------|-----------------|---------|------------|  
+|1     |split read       |spliter  |0.0.0       |  
+|2     |cutadapter and qc|fqtool   |0.0.0       |  
+|3     |filter rrna      |filter   |0.0.0       |  
+|4     |downsample fastq |seqtk    |1.3-r106    |  
+|5     |genome slignment |bwa      |0.7.17-r1188|  
+|6     |markdup          |duplexer |0.0.0       |  
+|7     |bam QC           |bamqc    |0.0.0       |  
+|8     |fusion calling   |fusionMap|10.0.1.29   |  
+|9     |express quant    |kallisto |0.45.1      |  
+|10    |report           |genrpt   |0.0.0       |  
