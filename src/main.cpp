@@ -22,9 +22,9 @@ int main(int argc, char** argv)
         return 0;
     }
     std::mutex logmtx;
-    util::loginfo("parsing arguments started.", logmtx);
     std::string cmp_time = std::string(__TIME__) + " " + std::string(__DATE__);
     CLI::App app("program: " + std::string(basename(argv[0])) + "\nversion: " + opt->version + "\nupdated: " + cmp_time);
+    app.get_formatter()->column_width(36);
     app.add_option("-s,--slist", opt->clOpt.sample_list, "sample list file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-r,--ref", opt->clOpt.ref, "reference file")->required(true)->check(CLI::ExistingFile);
     app.add_option("-b,--bed", opt->clOpt.reg, "bed region file")->required(true)->check(CLI::ExistingFile);

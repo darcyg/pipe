@@ -17,33 +17,15 @@ void GenJob::setBam(const std::string& b){
     bam = b;
 }
 
-void GenJob::genFastpJob(Job* j){
-    std::string ofq1 = j->workdir.second + j->pre + ".R1.fq.gz";
-    std::string ofq2 = j->workdir.second + j->pre + ".R2.fq.gz";
-    j->cmd.second += mOpt->ioOpt.bin_dir + "/fastp";
-    j->cmd.second += " -i " + lib1 + " -I " + lib2;
-    j->cmd.second += " -o " + ofq1;
-    j->cmd.second += " -O " + ofq2;
-    j->cmd.second += " -j " + j->workdir.second + j->pre + ".json";
-    j->cmd.second += " -h " + j->workdir.second + j->pre + ".html";
-    j->memory.second = "1g";
-    j->slots.second = "2";
-    j->sopt.second.append(" -l p=" + j->slots.second);
-    j->sopt.second.append(" -l vf=" + j->memory.second);
-    if(mOpt->clOpt.local){j->host.second = "localhost";};
-    j->o1 = ofq1;
-    j->o2 = ofq2;
-}
-
-void GenJob::genSplitrJob(const std::string& conf, Job* j){
-    j->cmd.second += mOpt->ioOpt.bin_dir + "/splitr";
+void GenJob::genSpliterJob(const std::string& conf, Job* j){
+    j->cmd.second += mOpt->ioOpt.bin_dir + "/spliter";
     j->cmd.second += " -b " + mOpt->ioOpt.db_dir + "/barcode/barcode.conf";
     j->cmd.second += " -s " + conf;
-    j->cmd.second += " -r " + lib1;
-    j->cmd.second += " -R " + lib2;
+    j->cmd.second += " -i " + lib1;
+    j->cmd.second += " -I " + lib2;
     j->cmd.second += " -o " + j->workdir.second;
-    j->cmd.second += " -p " + j->pre;
-    j->memory.second = "4g";
+    j->memory.second = "5g";
+    j->slots.second = "5";
     int count = 0;
     std::ifstream fr(conf.c_str());
     std::string tmpstr;
@@ -55,6 +37,26 @@ void GenJob::genSplitrJob(const std::string& conf, Job* j){
     j->sopt.second.append(" -l p=" + j->slots.second);
     j->sopt.second.append(" -l vf=" + j->memory.second);
     if(mOpt->clOpt.local){j->host.second = "localhost";};
+}
+
+void GenJob::genFqtoolJob(Job* j){
+    std::string ofq1 = j->workdir.second + j->pre + ".R1.fq.gz";
+    std::string ofq2 = j->workdir.second + j->pre + ".R2.fq.gz";
+    j->cmd.second += mOpt->ioOpt.bin_dir + "/fqtool";
+    j->cmd.second += " -a --detect_pe_adapter ";
+    j->cmd.second += " -u --umi_loc 6 --umi_skip 1 --umi_len 8 --umi_drop_other_comment";
+    j->cmd.second += " -i " + lib1 + " -I " + lib2;
+    j->cmd.second += " -o " + ofq1;
+    j->cmd.second += " -O " + ofq2;
+    j->cmd.second += " -J " + j->workdir.second + j->pre + ".json";
+    j->cmd.second += " -H " + j->workdir.second + j->pre + ".html";
+    j->memory.second = "1g";
+    j->slots.second = "4";
+    j->sopt.second.append(" -l p=" + j->slots.second);
+    j->sopt.second.append(" -l vf=" + j->memory.second);
+    if(mOpt->clOpt.local){j->host.second = "localhost";};
+    j->o1 = ofq1;
+    j->o2 = ofq2;
 }
 
 void GenJob::genSeqtkJob(Job* j){
@@ -85,12 +87,12 @@ void GenJob::genSeqtkJob(Job* j){
     j->o2 = j->workdir.second + util::basename(lib2);
 }
 
-void GenJob::genFiltdbJob(Job* j){
-    j->cmd.second += mOpt->ioOpt.bin_dir + "/filtdb";
+void GenJob::genFilterJob(Job* j){
+    j->cmd.second += mOpt->ioOpt.bin_dir + "/filter";
     j->cmd.second += " -i " + lib1;
     j->cmd.second += " -I " + lib2;
     j->cmd.second += " -r " + mOpt->ioOpt.db_dir + "/rrna/human.rrna.fa";
-    j->cmd.second += " -q -1 ";
+    j->cmd.second += " -m 15 ";
     j->cmd.second += " -o " + j->workdir.second;
     j->cmd.second += " -p " + j->pre;
     j->memory.second = "1g";
@@ -98,8 +100,8 @@ void GenJob::genFiltdbJob(Job* j){
     j->sopt.second.append(" -l p=" + j->slots.second);
     j->sopt.second.append(" -l vf=" + j->memory.second);
     if(mOpt->clOpt.local){j->host.second = "localhost";}
-    j->o1 = j->workdir.second + util::basename(lib1);
-    j->o2 = j->workdir.second + util::basename(lib2);
+    j->o1 = j->workdir.second + "/" + j->pre + ".R1.fq";
+    j->o2 = j->workdir.second + "/" + j->pre + ".R2.fq";
 }
 
 void GenJob::genAlignJob(Job* j){
@@ -126,9 +128,11 @@ void GenJob::genAlignJob(Job* j){
 }
 
 void GenJob::genMkdupJob(Job* j){
-    j->cmd.second += mOpt->ioOpt.bin_dir + "/mkdup";
+    j->cmd.second += mOpt->ioOpt.bin_dir + "/duplexer";
     j->cmd.second += " -i " + bam;
     j->cmd.second += " -o " + j->workdir.second + util::basename(bam);
+    j->cmd.second += " -r " + mOpt->clOpt.ref;
+    j->cmd.second += " -m ";
     j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.log 2>&1";
     j->cmd.second += " && rm -rf " + j->workdir.second + j->pre + ".mkdup.sort.bam*";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools sort -@ 8 -o " + j->workdir.second + j->pre + ".mkdup.sort.bam";
@@ -147,14 +151,13 @@ void GenJob::genMkdupJob(Job* j){
 
 void GenJob::genBamqcJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/bamqc";
-    j->cmd.second += " -i " + bam;
-    j->cmd.second += " -b " + mOpt->clOpt.reg;
+    j->cmd.second += " -b " + bam;
+    j->cmd.second += " -r " + mOpt->clOpt.reg;
     j->cmd.second += " -o " + j->workdir.second;
     j->cmd.second += " -p " + j->pre;
-    j->cmd.second += " -n " + j->pre;
     j->cmd.second += " > " + j->workdir.second + j->pre + "qc.log 2>&1";
     j->memory.second = "1g";
-    j->slots.second = "1";
+    j->slots.second = "4";
     j->sopt.second.append(" -l p=" + j->slots.second);
     j->sopt.second.append(" -l vf=" + j->memory.second);
     if(mOpt->clOpt.local){j->host.second = "localhost";};
@@ -190,9 +193,9 @@ void GenJob::genExpressJob(Job* j){
 }
 
 void GenJob::genReportJob(Job* j){
-    std::string filtlog = mOpt->ioOpt.fil_dir + "/" + j->pre + ".filt.log";
-    std::string ddpqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + "_DDP_QC.tsv";
-    std::string idpqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + "_IDP_QC.tsv";
+    std::string filtlog = mOpt->ioOpt.fil_dir + "/" + j->pre + ".filter.log";
+    std::string ddpqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".DDP.tsv";
+    std::string idpqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".IDP.tsv";
     std::string fusrpt = mOpt->ioOpt.fus_dir + "/" + j->pre + "/" + j->pre + ".FusionReport.txt";
     std::string abundance = mOpt->ioOpt.exp_dir + "/" + j->pre + "/abundance.tsv";
     std::string ens2gen = mOpt->ioOpt.db_dir + "/NCBI/ensebml2genename";

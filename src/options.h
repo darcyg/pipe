@@ -33,8 +33,8 @@ class IODirectoryOptions{
         bin_dir = "./";           
         db_dir = "./";            
         sjm_dir = "00.sjm";       
-        cut_dir = "01.cutadapter";
-        spl_dir = "02.splitread";
+        spl_dir = "01.splitread";
+        cut_dir = "02.cutadapter";
         fil_dir = "03.filtdb";    
         dfq_dir = "04.seqtk";     
         aln_dir = "05.alignment"; 

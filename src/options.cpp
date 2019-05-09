@@ -115,16 +115,38 @@ void Options::genDirectory(){
 }
 
 void Options::showMark(){
-    std::vector<std::string> stg = {"cutadaptor by fastp", "split read by splitr", "filter rrna by filtdb",
-                                    "downsample fastq by seqtk", "genome slignment by bwa", "markdup by mkdp",
-                                    "bam QC by bamqc", "fusion calling by fusionMap", "express quant by kallisto",
-                                    "report by genrep"};
+    std::vector<std::pair<std::string, std::string>> stg;
+    stg.push_back({"split read",        "spliter"});
+    stg.push_back({"cutadapter and qc", "fqtool"});
+    stg.push_back({"filter rrna",       "filter"});
+    stg.push_back({"downsample fastq",  "seqtk"});
+    stg.push_back({"genome slignment",  "bwa"});
+    stg.push_back({"markdup",           "duplexer"});
+    stg.push_back({"bam QC",            "bamqc"});
+    stg.push_back({"fusion calling",    "fusionMap"});
+    stg.push_back({"express quant",     "kallisto"});
+    stg.push_back({"report",            "genrpt"});
+    
+    std::map<std::string, std::string> sver;
+    sver["spliter"]    = "0.0.0";
+    sver["fqtool"]     = "0.0.0";
+    sver["filter"]     = "0.0.0";
+    sver["seqtk"]      = "1.3-r106";
+    sver["bwa"]        = "0.7.17-r1188";
+    sver["duplexer"]   = "0.0.0";
+    sver["bamqc"]      = "0.0.0";
+    sver["fusionMap"]  = "10.0.1.29";
+    sver["kallisto"]   = "0.45.1";
+    sver["genrpt"]     = "0.0.0";
+    
     std::cout << std::left;
-    std::cout << "  ┌--------------------------------------┐" << std::endl;
-    std::cout << "  |" << std::setw(10) << "Marker" << std::setw(28) << "Analysis" << "|" << std::endl;
+    std::cout << "  ┌------┬-----------------┬---------┬------------┐" << std::endl;
+    std::cout << "  |" << std::setw(6) << "Marker" << "|" << std::setw(17) << "Analysis" << "|";
+    std::cout << std::setw(9) << "Software" << "|" << std::setw(12) << "Version" << "|" << std::endl;
     for(size_t i = 0; i < stg.size(); ++i){
-        std::cout << "  |--------------------------------------|" << std::endl;
-        std::cout << "  |" << std::setw(10) << i + 1 << std::setw(28) << stg[i] << "|" << std::endl;
+    std::cout << "  |------┼-----------------┼---------┼------------|" << std::endl;
+        std::cout << "  |" << std::setw(6) << i + 1 << "|" << std::setw(17) << stg[i].first << "|";
+        std::cout << std::setw(9) << stg[i].second << "|" << std::setw(12) << sver[stg[i].second] << "|" << std::endl;
     }
-    std::cout << "  └--------------------------------------┘" << std::endl;
+    std::cout << "  └------┴-----------------┴---------┴------------┘" << std::endl;
 }

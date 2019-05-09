@@ -18,16 +18,15 @@ void GenPipe::genPrelibPipe(){
         iss.clear();
         iss.str(tmpStr);
         iss >> sampleNo >> flowCell >> libName >> read1 >> read2 >> barcodeConf;
+        // generate jobs
         GenJob* genJob = new GenJob(mOpt);
-        Job* jFastp = new Job("fastp", mOpt->ioOpt.cut_dir, libName, 1);
+        // generate spliter job
+        Job* jSpliter = new Job("spliter", mOpt->ioOpt.spl_dir, libName, 1);
         genJob->setLib(read1, read2);
-        genJob->genFastpJob(jFastp);
-        Job* jSplitr = new Job("splitr", mOpt->ioOpt.spl_dir, libName, 2);
-        genJob->setLib(jFastp->o1, jFastp->o2);
-        genJob->genSplitrJob(barcodeConf, jSplitr);
-        Task* task = new Task(2);
-        task->addJob(jFastp, 0);
-        task->addJob(jSplitr, 1);
+        genJob->genSpliterJob(barcodeConf, jSpliter);
+        // push to tasks
+        Task* task = new Task(1);
+        task->addJob(jSpliter, 0);
         std::string sjmStatus(mOpt->ioOpt.sjm_dir + "/" + libName + "_prelib.sjm.status");
         std::map<std::string, std::string> jMap;
         Job::getStatus(jMap, sjmStatus);
@@ -79,47 +78,52 @@ void GenPipe::genAnalibTask(){
             subRead1 = mOpt->ioOpt.spl_dir + "/" + subLib + ".R1.fq";
             subRead2 = mOpt->ioOpt.spl_dir + "/" + subLib + ".R2.fq";
             GenJob* genJob = new GenJob(mOpt);
-            Task* task = new Task(6);
-            // filtdb
-            Job* jFiltdb = new Job("filtdb", mOpt->ioOpt.fil_dir, subLib, 3);
+            Task* task = new Task(7);
+            // fqtool
+            Job* jFqtool = new Job("fqtool", mOpt->ioOpt.cut_dir, subLib, 2);
             genJob->setLib(subRead1, subRead2);
-            genJob->genFiltdbJob(jFiltdb);
-            task->addJob(jFiltdb, 0); 
+            genJob->genFqtoolJob(jFqtool);
+            task->addJob(jFqtool, 0);
+            // filter
+            Job* jFiltdb = new Job("filter", mOpt->ioOpt.fil_dir, subLib, 3);
+            genJob->setLib(jFqtool->o1, jFqtool->o2);
+            genJob->genFilterJob(jFiltdb);
+            task->addJob(jFiltdb, 1); 
             // seqtk
             Job* jSeqtk = new Job("seqtk", mOpt->ioOpt.dfq_dir, subLib, 4);
             jSeqtk->optPre = sampleNo;
             genJob->setLib(jFiltdb->o1, jFiltdb->o2);
             genJob->genSeqtkJob(jSeqtk);
-            task->addJob(jSeqtk, 1);
+            task->addJob(jSeqtk, 2);
             // bwa mem
             Job* jAln = new Job("bwa", mOpt->ioOpt.aln_dir, subLib, 5);
             genJob->setLib(jSeqtk->o1, jSeqtk->o2);
             genJob->genAlignJob(jAln);
-            task->addJob(jAln, 2);
+            task->addJob(jAln, 3);
             // mkdup
-            Job* jMkdup = new Job("mkdup", mOpt->ioOpt.mkd_dir, subLib, 6);
+            Job* jMkdup = new Job("duplexer", mOpt->ioOpt.mkd_dir, subLib, 6);
             genJob->setBam(jAln->o1);
             genJob->genMkdupJob(jMkdup);
-            task->addJob(jMkdup, 3);
+            task->addJob(jMkdup, 4);
             // bamqc
             Job* jBamqc = new Job("bamqc", mOpt->ioOpt.bqc_dir, subLib, 7);
             genJob->setBam(jMkdup->o1);
             genJob->genBamqcJob(jBamqc);
-            task->addJob(jBamqc, 4);
+            task->addJob(jBamqc, 5);
             // fusion
             Job* jFusion = new Job("fusionmap", mOpt->ioOpt.fus_dir, subLib, 8);
             genJob->setLib(jSeqtk->o1, jSeqtk->o2);
             genJob->genFusionJob(jFusion);
-            task->addJob(jFusion, 2);
+            task->addJob(jFusion, 3);
             // express
             Job* jExpress = new Job("kallisto", mOpt->ioOpt.exp_dir, subLib, 9);
             genJob->setLib(jSeqtk->o1, jSeqtk->o2);
             genJob->genExpressJob(jExpress);
-            task->addJob(jExpress, 2);
+            task->addJob(jExpress, 3);
             // report
             Job* jReport = new Job("genrpt", mOpt->ioOpt.rep_dir, subLib, 10);
             genJob->genReportJob(jReport);
-            task->addJob(jReport, 5);
+            task->addJob(jReport, 6);
             // updating status
             std::string sjmStatus = mOpt->ioOpt.sjm_dir + "/" + subLib + "_analib.sjm.status";
             std::map<std::string, std::string> jMap;
@@ -154,8 +158,3 @@ void GenPipe::genAnalibTask(){
     }
     fr1.close();
 }
-
-
-
-
-

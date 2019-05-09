@@ -72,26 +72,26 @@ class GenJob{
          */
         void setBam(const std::string& b);
 
-        /** generate fastp Job
-         * @param j pointer to Job
-         */
-        void genFastpJob(Job* j);
-        
-        /** generate splitr Job
+        /** generate spliter Job
          * @param conf barcode configure file path
          * @param j pointer to Job
          */
-        void genSplitrJob(const std::string& conf, Job* j);
+        void genSpliterJob(const std::string& conf, Job* j);
+        
+        /** generate fqtool Job
+         * @param j pointer to Job
+         */
+        void genFqtoolJob(Job* j);
         
         /** generate seqtk Job
          * @param j pointer to Job
          */
         void genSeqtkJob(Job* j);
         
-        /** generate filtdb Job
+        /** generate filter Job
          * @param j pointer to Job
          */
-        void genFiltdbJob(Job* j);
+        void genFilterJob(Job* j);
         
         /** generate alignment Job
          * @param j pointer to Job
