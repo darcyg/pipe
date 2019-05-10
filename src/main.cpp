@@ -18,6 +18,9 @@ int main(int argc, char** argv)
     std::string sys_cmd = std::string(argv[0]) + " -h";
     if(argc == 1){
         std::system(sys_cmd.c_str());
+        return 0;
+    }
+    if(argc == 2 && strcmp(argv[1], "-L") == 0){
         opt->showMark();
         return 0;
     }
@@ -41,32 +44,25 @@ int main(int argc, char** argv)
     app.add_flag("-u,--update", opt->clOpt.update, "update command to execute")->needs(prerun);
     CLI_PARSE(app, argc, argv);
     util::loginfo("parsing arguments finished.", logmtx);
-     
     util::loginfo("preparing output parent directory.", logmtx);
     util::makedir(opt->ioOpt.out_dir);
     util::loginfo("output parent directory prepared.", logmtx);
-    
     util::loginfo("updating arguments.", logmtx);
     opt->updateOptions();
     util::loginfo("arguments updated.", logmtx);
-    
     util::loginfo("construct pipeline object.", logmtx);
     Pipeline* p = new Pipeline(opt->nSubPipe, opt->nSamples, opt->failMarkFile, opt->goodMarkFile);
     util::loginfo("pipeline object construced.", logmtx);
-    
     util::loginfo("generate subdirectories.", logmtx);
     opt->genDirectory();
     util::loginfo("subdirectories generated.", logmtx);
-
     GenPipe* g = new GenPipe(opt, p);
     util::loginfo("generate library prepare sub pipeline.", logmtx);
     g->genPrelibPipe();
     util::loginfo("library prpare sub pipeline generated.", logmtx);
-    
     util::loginfo("generate library analysis pipeline.", logmtx);
     g->genAnalibTask();
     util::loginfo("library analysis pipeline generated.", logmtx);
-    
     if(opt->clOpt.rerun){
         util::loginfo("resume last running of pipeline started.", logmtx);
         p->prepareRerun();
