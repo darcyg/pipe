@@ -23,6 +23,7 @@ void GenJob::genSpliterJob(const std::string& conf, Job* j){
     j->cmd.second += " -s " + conf;
     j->cmd.second += " -i " + lib1;
     j->cmd.second += " -I " + lib2;
+    j->cmd.second += " -l " + j->workdir.second + "/" + j->pre + ".spl.json";
     j->cmd.second += " -o " + j->workdir.second;
     j->memory.second = "5g";
     j->slots.second = "5";
