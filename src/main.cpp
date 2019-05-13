@@ -1,15 +1,16 @@
 #include <iostream>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <climits>
 #include <mutex>
+#include <CLI.hpp>
 #include <libgen.h>
 #include "pipeline.h"
 #include "genpipe.h"
 #include "options.h"
-#include "CLI.hpp"
 #include "util.h"
 
 int main(int argc, char** argv)

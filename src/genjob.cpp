@@ -43,8 +43,8 @@ void GenJob::genFqtoolJob(Job* j){
     std::string ofq1 = j->workdir.second + j->pre + ".R1.fq.gz";
     std::string ofq2 = j->workdir.second + j->pre + ".R2.fq.gz";
     j->cmd.second += mOpt->ioOpt.bin_dir + "/fqtool";
-    j->cmd.second += " -a --detect_pe_adapter ";
-    j->cmd.second += " -u --umi_loc 6 --umi_skip 1 --umi_len 8 --umi_drop_other_comment";
+    j->cmd.second += " -q -a --detect_pe_adapter ";
+    j->cmd.second += " -u --umi_location 6 --umi_skip_length 1 --umi_length 8 --umi_drop_comment";
     j->cmd.second += " -i " + lib1 + " -I " + lib2;
     j->cmd.second += " -o " + ofq1;
     j->cmd.second += " -O " + ofq2;
@@ -130,13 +130,13 @@ void GenJob::genAlignJob(Job* j){
 void GenJob::genMkdupJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/duplexer";
     j->cmd.second += " -i " + bam;
-    j->cmd.second += " -o " + j->workdir.second + util::basename(bam);
+    j->cmd.second += " -o " + j->workdir.second;
+    j->cmd.second += " -p " + j->pre;
     j->cmd.second += " -r " + mOpt->clOpt.ref;
     j->cmd.second += " -m ";
     j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.log 2>&1";
-    j->cmd.second += " && rm -rf " + j->workdir.second + j->pre + ".mkdup.sort.bam*";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools sort -@ 8 -o " + j->workdir.second + j->pre + ".mkdup.sort.bam";
-    j->cmd.second += " " + j->workdir.second + util::basename(bam);
+    j->cmd.second += " " + j->workdir.second + j->pre + ".mkdup.bam";
     j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.sort.log 2>&1";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools index ";
     j->cmd.second += j->workdir.second + j->pre + ".mkdup.sort.bam";
@@ -193,15 +193,14 @@ void GenJob::genExpressJob(Job* j){
 }
 
 void GenJob::genReportJob(Job* j){
-    std::string filtlog = mOpt->ioOpt.fil_dir + "/" + j->pre + ".filter.log";
-    std::string ddpqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".DDP.tsv";
-    std::string idpqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".IDP.tsv";
+    std::string filtlog = mOpt->ioOpt.fil_dir + "/" + j->pre + ".fil.json";
+    std::string bamqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".qc.json";
     std::string fusrpt = mOpt->ioOpt.fus_dir + "/" + j->pre + "/" + j->pre + ".FusionReport.txt";
     std::string abundance = mOpt->ioOpt.exp_dir + "/" + j->pre + "/abundance.tsv";
     std::string ens2gen = mOpt->ioOpt.db_dir + "/NCBI/ensebml2genename";
     std::string outf = mOpt->ioOpt.rep_dir + "/" + j->pre + ".report.xlsx";
     j->cmd.second = mOpt->ioOpt.bin_dir + "/genrpt";
-    j->cmd.second += " -f " + filtlog + " -d " + ddpqc + " -i " + idpqc + " -s " + fusrpt;
+    j->cmd.second += " -f " + filtlog + " -b " + bamqc + " -s " + fusrpt;
     j->cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + mOpt->clOpt.gset  + " -o " + outf;
     j->memory.second = "1g";
     j->slots.second = "1";
