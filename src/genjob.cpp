@@ -49,8 +49,8 @@ void GenJob::genFqtoolJob(Job* j){
     j->cmd.second += " -i " + lib1 + " -I " + lib2;
     j->cmd.second += " -o " + ofq1;
     j->cmd.second += " -O " + ofq2;
-    j->cmd.second += " -J " + j->workdir.second + j->pre + ".json";
-    j->cmd.second += " -H " + j->workdir.second + j->pre + ".html";
+    j->cmd.second += " -J " + j->workdir.second + j->pre + ".fq.json";
+    j->cmd.second += " -H " + j->workdir.second + j->pre + ".fq.html";
     j->memory.second = "1g";
     j->slots.second = "4";
     j->sopt.second.append(" -l p=" + j->slots.second);
@@ -93,7 +93,7 @@ void GenJob::genFilterJob(Job* j){
     j->cmd.second += " -i " + lib1;
     j->cmd.second += " -I " + lib2;
     j->cmd.second += " -r " + mOpt->ioOpt.db_dir + "/rrna/human.rrna.fa";
-    j->cmd.second += " -m 15 ";
+    j->cmd.second += " -m 15 -d ";
     j->cmd.second += " -o " + j->workdir.second;
     j->cmd.second += " -p " + j->pre;
     j->memory.second = "1g";
@@ -194,6 +194,7 @@ void GenJob::genExpressJob(Job* j){
 }
 
 void GenJob::genReportJob(Job* j){
+    std::string fqqclog = mOpt->ioOpt.cut_dir + "/" + j->pre + ".fq.json";
     std::string filtlog = mOpt->ioOpt.fil_dir + "/" + j->pre + ".fil.json";
     std::string bamqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".qc.json";
     std::string fusrpt = mOpt->ioOpt.fus_dir + "/" + j->pre + "/" + j->pre + ".FusionReport.txt";
@@ -201,7 +202,7 @@ void GenJob::genReportJob(Job* j){
     std::string ens2gen = mOpt->ioOpt.db_dir + "/NCBI/ensebml2genename";
     std::string outf = mOpt->ioOpt.rep_dir + "/" + j->pre + ".report.xlsx";
     j->cmd.second = mOpt->ioOpt.bin_dir + "/genrpt";
-    j->cmd.second += " -f " + filtlog + " -b " + bamqc + " -s " + fusrpt;
+    j->cmd.second += " -q " + fqqclog + " -f " + filtlog + " -b " + bamqc + " -s " + fusrpt;
     j->cmd.second += " -k " + abundance + " -e " + ens2gen + " -g " + mOpt->clOpt.gset  + " -o " + outf;
     j->memory.second = "1g";
     j->slots.second = "1";
