@@ -1,8 +1,5 @@
 bin_PROGRAMS = fusepipe
 
-fusepipe_CPPFLAGS = \
-     -I$(top_srcdir)/extra/
-
 fusepipe_LDADD = \
         $(LDFLAGS)
 
