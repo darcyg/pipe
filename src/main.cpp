@@ -6,7 +6,7 @@
 #include <sstream>
 #include <climits>
 #include <mutex>
-#include <CLI.hpp>
+#include "CLI.hpp"
 #include <libgen.h>
 #include "pipeline.h"
 #include "genpipe.h"
