@@ -93,7 +93,7 @@ void GenJob::genFilterJob(Job* j){
     j->cmd.second += " -i " + lib1;
     j->cmd.second += " -I " + lib2;
     j->cmd.second += " -r " + mOpt->ioOpt.db_dir + "/ncrna/Homo_sapiens.GRCh37.ncrna.class.fa";
-    j->cmd.second += " -m 15 -d ";
+    j->cmd.second += " -m -1 -d ";
     j->cmd.second += " -o " + j->workdir.second;
     j->cmd.second += " -p " + j->pre;
     j->memory.second = "1g";
@@ -108,7 +108,7 @@ void GenJob::genFilterJob(Job* j){
 void GenJob::genAlignJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/bwa mem";
     j->cmd.second += " -C -t 8 " + mOpt->clOpt.ref + " " + lib1 + " " + lib2;
-    j->cmd.second += " 2 > " + j->workdir.second + j->pre + ".memalign.log";
+    j->cmd.second += " 2> " + j->workdir.second + j->pre + ".memalign.log";
     j->cmd.second += " | " + mOpt->ioOpt.bin_dir + "/samtools view -@ 8";
     j->cmd.second += " -o " + j->workdir.second + j->pre + ".aln.bam";
     j->cmd.second += " >> " + j->workdir.second + j->pre + ".memalign.log";
