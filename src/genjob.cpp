@@ -23,7 +23,7 @@ void GenJob::genSpliterJob(const std::string& conf, Job* j){
     j->cmd.second += " -s " + conf;
     j->cmd.second += " -i " + lib1;
     j->cmd.second += " -I " + lib2;
-    j->cmd.second += " -l " + j->workdir.second + "/" + j->pre + ".spl.json";
+    j->cmd.second += " -l " + j->workdir.second + "/" + j->pre + ".spliter.json";
     j->cmd.second += " -o " + j->workdir.second;
     j->memory.second = "5g";
     j->slots.second = "5";
@@ -89,13 +89,13 @@ void GenJob::genSeqtkJob(Job* j){
 }
 
 void GenJob::genFilterJob(Job* j){
-    j->cmd.second += mOpt->ioOpt.bin_dir + "/filter";
+    j->cmd.second += mOpt->ioOpt.bin_dir + "/filter -d";
     j->cmd.second += " -i " + lib1;
     j->cmd.second += " -I " + lib2;
     j->cmd.second += " -r " + mOpt->ioOpt.db_dir + "/ncrna/Homo_sapiens.GRCh37.ncrna.class.fa";
-    j->cmd.second += " -m -1 -d ";
-    j->cmd.second += " -o " + j->workdir.second;
-    j->cmd.second += " -p " + j->pre;
+    j->cmd.second += " -o " + j->workdir.second + "/" + util::basename(lib1);
+    j->cmd.second += " -O " + j->workdir.second + "/" + util::basename(lib2);
+    j->cmd.second += " -l " + j->workdir.second + "/" + j->pre + ".filter.json";
     j->memory.second = "1g";
     j->slots.second = "6";
     j->sopt.second.append(" -l p=" + j->slots.second);
@@ -131,8 +131,8 @@ void GenJob::genAlignJob(Job* j){
 void GenJob::genMkdupJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/duplexer";
     j->cmd.second += " -i " + bam;
-    j->cmd.second += " -o " + j->workdir.second;
-    j->cmd.second += " -p " + j->pre;
+    j->cmd.second += " -o " + j->workdir.second + "/" + j->pre + ".mkdup.bam";
+    j->cmd.second += " -l " + j->workdir.second + "/" + j->pre + ".mkdup.json";
     j->cmd.second += " -r " + mOpt->clOpt.ref;
     j->cmd.second += " -m ";
     j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.log 2>&1";
@@ -154,9 +154,9 @@ void GenJob::genBamqcJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/bamqc";
     j->cmd.second += " -b " + bam;
     j->cmd.second += " -r " + mOpt->clOpt.reg;
-    j->cmd.second += " -o " + j->workdir.second;
+    j->cmd.second += " -o " + j->workdir.second + "/" + j->pre + ".bamqc.json";
     j->cmd.second += " -p " + j->pre;
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".bamqc.log 2>&1";
+    j->cmd.second += " > " + j->workdir.second + j->pre + ".log 2>&1";
     j->memory.second = "1g";
     j->slots.second = "4";
     j->sopt.second.append(" -l p=" + j->slots.second);
@@ -196,7 +196,7 @@ void GenJob::genExpressJob(Job* j){
 void GenJob::genReportJob(Job* j){
     std::string fqqclog = mOpt->ioOpt.cut_dir + "/" + j->pre + ".fqtool.json";
     std::string filtlog = mOpt->ioOpt.fil_dir + "/" + j->pre + ".filter.json";
-    std::string bamqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".BasicQC.json";
+    std::string bamqc = mOpt->ioOpt.bqc_dir + "/" + j->pre + ".bamqc.json";
     std::string fusrpt = mOpt->ioOpt.fus_dir + "/" + j->pre + "/" + j->pre + ".FusionReport.txt";
     std::string abundance = mOpt->ioOpt.exp_dir + "/" + j->pre + "/abundance.tsv";
     std::string ens2gen = mOpt->ioOpt.db_dir + "/NCBI/ensebml2genename";
