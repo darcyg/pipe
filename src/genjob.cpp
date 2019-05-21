@@ -41,10 +41,10 @@ void GenJob::genSpliterJob(const std::string& conf, Job* j){
 }
 
 void GenJob::genFqtoolJob(Job* j){
-    std::string ofq1 = j->workdir.second + j->pre + ".R1.fq.gz";
-    std::string ofq2 = j->workdir.second + j->pre + ".R2.fq.gz";
+    std::string ofq1 = j->workdir.second + j->pre + ".R1.fq";
+    std::string ofq2 = j->workdir.second + j->pre + ".R2.fq";
     j->cmd.second += mOpt->ioOpt.bin_dir + "/fqtool";
-    j->cmd.second += " -q -a --detect_pe_adapter ";
+    j->cmd.second += " -q -a -x";
     j->cmd.second += " -u --umi_location 6 --umi_skip_length 1 --umi_length 8 --umi_drop_comment";
     j->cmd.second += " -i " + lib1 + " -I " + lib2;
     j->cmd.second += " -o " + ofq1;
@@ -101,25 +101,21 @@ void GenJob::genFilterJob(Job* j){
     j->sopt.second.append(" -l p=" + j->slots.second);
     j->sopt.second.append(" -l vf=" + j->memory.second);
     if(mOpt->clOpt.local){j->host.second = "localhost";}
-    j->o1 = j->workdir.second + "/" + j->pre + ".R1.fq";
-    j->o2 = j->workdir.second + "/" + j->pre + ".R2.fq";
+    j->o1 = j->workdir.second + "/" + util::basename(lib1);
+    j->o2 = j->workdir.second + "/" + util::basename(lib2);
 }
 
 void GenJob::genAlignJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/bwa mem";
     j->cmd.second += " -C -t 8 " + mOpt->clOpt.ref + " " + lib1 + " " + lib2;
-    j->cmd.second += " 2> " + j->workdir.second + j->pre + ".memalign.log";
     j->cmd.second += " | " + mOpt->ioOpt.bin_dir + "/samtools view -@ 8";
     j->cmd.second += " -o " + j->workdir.second + j->pre + ".aln.bam";
-    j->cmd.second += " >> " + j->workdir.second + j->pre + ".memalign.log";
     j->cmd.second += " && rm -rf " + j->workdir.second + j->pre + ".aln.sort.bam*";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools sort -@ 8";
     j->cmd.second += " -o " + j->workdir.second + j->pre + ".aln.sort.bam";
     j->cmd.second += " " + j->workdir.second + j->pre + ".aln.bam";
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".aln.sort.log 2>&1";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools index ";
     j->cmd.second += j->workdir.second + j->pre + ".aln.sort.bam";
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".aln.sort.index.log 2>&1";
     j->memory.second = "16g";
     j->slots.second = "8";
     j->sopt.second.append(" -l p=" + j->slots.second);
@@ -135,13 +131,10 @@ void GenJob::genMkdupJob(Job* j){
     j->cmd.second += " -l " + j->workdir.second + "/" + j->pre + ".mkdup.json";
     j->cmd.second += " -r " + mOpt->clOpt.ref;
     j->cmd.second += " -m ";
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.log 2>&1";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools sort -@ 8 -o " + j->workdir.second + j->pre + ".mkdup.sort.bam";
     j->cmd.second += " " + j->workdir.second + j->pre + ".mkdup.bam";
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.sort.log 2>&1";
     j->cmd.second += " && " + mOpt->ioOpt.bin_dir + "/samtools index ";
     j->cmd.second += j->workdir.second + j->pre + ".mkdup.sort.bam";
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".mkdup.sort.index.log 2>&1";
     j->memory.second = "8g";
     j->slots.second = "8";
     j->sopt.second.append(" -l p=" + j->slots.second);
@@ -155,8 +148,6 @@ void GenJob::genBamqcJob(Job* j){
     j->cmd.second += " -b " + bam;
     j->cmd.second += " -r " + mOpt->clOpt.reg;
     j->cmd.second += " -o " + j->workdir.second + "/" + j->pre + ".bamqc.json";
-    j->cmd.second += " -p " + j->pre;
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".log 2>&1";
     j->memory.second = "1g";
     j->slots.second = "4";
     j->sopt.second.append(" -l p=" + j->slots.second);
@@ -168,7 +159,6 @@ void GenJob::genFusionJob(Job* j){
     j->cmd.second += "/share/public/software/mono/mono/bin/mono /share/public/software/oshell/oshell.exe";
     j->cmd.second += " --semap " + mOpt->ioOpt.db_dir + "/FusionMap/ Human.B37.3 RefGene";
     j->cmd.second += " " + j->workdir.second + j->pre + ".fs.cfg";
-    j->cmd.second += " > " + j->workdir.second + j->pre + ".fs.log 2>&1";
     j->memory.second = "8g";
     j->slots.second = "8";
     j->sopt.second.append(" -l p=" + j->slots.second);

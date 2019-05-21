@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "json.hpp"
 #include "util.h"
 
 /** struct to store input/output diecttory Options */
@@ -33,12 +34,12 @@ class IODirectoryOptions{
         bin_dir = "./";           
         db_dir = "./";            
         sjm_dir = "00.sjm";       
-        spl_dir = "01.splitread";
-        cut_dir = "02.cutadapter";
-        fil_dir = "03.filtdb";    
+        spl_dir = "01.spliter";
+        cut_dir = "02.fqtool";
+        fil_dir = "03.filter";    
         dfq_dir = "04.seqtk";     
-        aln_dir = "05.alignment"; 
-        mkd_dir = "06.markdup";   
+        aln_dir = "05.align"; 
+        mkd_dir = "06.mkdup";   
         bqc_dir = "07.bamqc";     
         fus_dir = "08.fusion";    
         exp_dir = "09.express";   

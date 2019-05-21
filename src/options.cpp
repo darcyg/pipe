@@ -78,17 +78,11 @@ size_t Options::getMinFqVolOfOnePool(const std::string& conf){
         iss.clear();
         iss.str(line);
         iss >> libName;
-        logfile = util::joinpath(ioOpt.fil_dir, libName + ".filt.log");
+        logfile = util::joinpath(ioOpt.fil_dir, libName + ".filter.json");
         std::ifstream fr1(logfile);
-        std::string confLine;
-        std::vector<std::string> vstr;
-        std::getline(fr1, confLine);
-        util::split(confLine, vstr, " ");
-        int totReads = std::atoi(vstr[2].c_str());
-        std::getline(fr1, confLine);
-        util::split(confLine, vstr, " ");
-        int filtReads = std::atoi(vstr[3].c_str());
-        readsNum.push_back(totReads - filtReads);
+        jsn::json j;
+        fr1 >> j;
+        readsNum.push_back(j["FilterResult"]["Summary"]["ReadsGot"]);
         fr1.close();
     }
     size_t minReadsNum = readsNum[0];
