@@ -1,6 +1,6 @@
 program: fusepipe  
 version: 0.0.0  
-updated: 22:53:39 Mar  7 2019  
+updated: 15:28:35 Jun  4 2019  
 Usage: fusepipe [OPTIONS]  
 
 |  Options                    | Explanations
@@ -12,15 +12,15 @@ Usage: fusepipe [OPTIONS]
 |  -t,--gset FILE             | gene list
 |  -v,--vread TEXT            | fastq  subset reads number
 |  -o,--out TEXT              | output directory
-|  -a,--amark INT in [1 - 10] | analysis marker range
-|  -i,--imark INT in [1 - 10] | initial analysis marker
-|  -e,--emark INT in [1 - 10] | end analysis marker
+|  -a,--amark INT in [1 - 11] | analysis marker range
+|  -i,--imark INT in [1 - 11] | initial analysis marker
+|  -e,--emark INT in [1 - 11] | end analysis marker
 |  -q,--queue TEXT            | queue to run tasks
 |  -c,--ctd                   | continue from last failure
 |  -l,--loc                   | run in localhost
 |  -g,--gen                   | generate sjms, not run tasks
 |  -u,--update Needs: --ctd   | update command to execute
-
+|  -n,--noclean               | not cleanup intermediate files
 Installation
 
 1. clone repo  
@@ -51,3 +51,4 @@ this is a sjm based fusion pipeline
 |8     |fusion calling   |fusionMap|10.0.1.29   
 |9     |express quant    |kallisto |0.45.1      
 |10    |report           |genrpt   |0.0.0       
+|11    |cleanup          |rm       |8.4         
