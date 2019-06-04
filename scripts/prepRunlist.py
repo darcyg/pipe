@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import pandas as pd
 
-if len(sys.argv) < 3:
-    print("{0} <tot.list> <query.log>\n");
+if len(sys.argv) < 2:
+    print(os.path.basename(sys.argv[0]),  "<raw.list>", "<query.log>");
     sys.exit(0);
 
 tot_list = sys.argv[1]

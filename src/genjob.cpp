@@ -145,8 +145,9 @@ void GenJob::genMkdupJob(Job* j){
 
 void GenJob::genBamqcJob(Job* j){
     j->cmd.second += mOpt->ioOpt.bin_dir + "/bamqc";
-    j->cmd.second += " -b " + bam;
-    j->cmd.second += " -r " + mOpt->clOpt.reg;
+    j->cmd.second += " -i " + bam;
+    j->cmd.second += " -b " + mOpt->clOpt.reg;
+    j->cmd.second += " -r " + mOpt->clOpt.ref;
     j->cmd.second += " -o " + j->workdir.second + "/" + j->pre + ".bamqc.json";
     j->memory.second = "1g";
     j->slots.second = "4";
