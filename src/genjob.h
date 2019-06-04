@@ -122,6 +122,11 @@ class GenJob{
          * @param j pointer to Job
          */
         void genReportJob(Job* j);
+
+        /** generate cleanup Job
+         * @param j pointer to Job
+         */
+        void genCleanupJob(Job* j);
 };
 
 #endif

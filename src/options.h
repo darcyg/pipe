@@ -66,10 +66,11 @@ class PipeControlOptions{
         bool local;                  ///< running pipeline in local server if true
         bool gensjm;                 ///< only generate sjm control files without running pipeline if true
         bool update;                 ///< update sjm control file before running pipeline if true
+        bool noclean;                ///< do not cleanup intermediate files after running pipeline if true
 
     PipeControlOptions(){
         minstage = 1;
-        maxstage = 10;
+        maxstage = 11;
         sample_list = "";
         ref = "";
         reg = "";
@@ -77,12 +78,13 @@ class PipeControlOptions{
         queue = "";
         ana_marker = {};
         ini_marker = 1;
-        end_marker = 10;
+        end_marker = 11;
         dfq_vol = "VOL";
         rerun = false;
         local = false;
         gensjm = false;
         update = false;
+        noclean = false;
     }
 };
 

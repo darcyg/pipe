@@ -78,7 +78,7 @@ void GenPipe::genAnalibTask(){
             subRead1 = mOpt->ioOpt.spl_dir + "/" + subLib + ".R1.fq";
             subRead2 = mOpt->ioOpt.spl_dir + "/" + subLib + ".R2.fq";
             GenJob* genJob = new GenJob(mOpt);
-            Task* task = new Task(7);
+            Task* task = new Task(8);
             // fqtool
             Job* jFqtool = new Job("fqtool", mOpt->ioOpt.cut_dir, subLib, 2);
             genJob->setLib(subRead1, subRead2);
@@ -124,6 +124,12 @@ void GenPipe::genAnalibTask(){
             Job* jReport = new Job("genrpt", mOpt->ioOpt.rep_dir, subLib, 10);
             genJob->genReportJob(jReport);
             task->addJob(jReport, 6);
+            // cleanup
+            if(!mOpt->clOpt.noclean){
+                Job* jClean = new Job("cleanup", mOpt->ioOpt.log_dir, subLib, 11);
+                genJob->genCleanupJob(jClean);
+                task->addJob(jClean, 7);
+            }
             // updating status
             std::string sjmStatus = mOpt->ioOpt.sjm_dir + "/" + subLib + "_analib.sjm.status";
             std::map<std::string, std::string> jMap;

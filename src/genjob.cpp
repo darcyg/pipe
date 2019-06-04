@@ -201,3 +201,19 @@ void GenJob::genReportJob(Job* j){
     j->sopt.second.append(" -l vf=" + j->memory.second);
     if(mOpt->clOpt.local){j->host.second = "localhost";}
 }
+
+void GenJob::genCleanupJob(Job* j){
+    j->cmd.second = "rm -f ";
+    j->cmd.second += mOpt->ioOpt.spl_dir + "/" + j->pre + "*.fq ";
+    j->cmd.second += mOpt->ioOpt.cut_dir + "/" + j->pre + "*.fq ";
+    if(mOpt->clOpt.dfq_vol != "VOL"){
+        j->cmd.second += mOpt->ioOpt.fil_dir + "/" + j->pre + "*.fq ";
+    }
+    j->cmd.second += mOpt->ioOpt.aln_dir + "/" + j->pre + "*.aln.bam ";
+    j->cmd.second += mOpt->ioOpt.mkd_dir + "/" + j->pre + "*.mkdup.bam ";
+    j->memory.second = "1g";
+    j->slots.second = "1";
+    j->sopt.second.append(" -l p=" + j->slots.second);
+    j->sopt.second.append(" -l vf=" + j->memory.second);
+    if(mOpt->clOpt.local){j->host.second = "localhost";}
+}

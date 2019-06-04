@@ -120,6 +120,7 @@ void Options::showMark(){
     stg.push_back({"fusion calling",    "fusionMap"});
     stg.push_back({"express quant",     "kallisto"});
     stg.push_back({"report",            "genrpt"});
+    stg.push_back({"cleanup",           "rm"});
     
     std::map<std::string, std::string> sver;
     sver["spliter"]    = "0.0.0";
@@ -132,6 +133,7 @@ void Options::showMark(){
     sver["fusionMap"]  = "10.0.1.29";
     sver["kallisto"]   = "0.45.1";
     sver["genrpt"]     = "0.0.0";
+    sver["rm"]         = "8.4";
     
     std::cout << std::left;
     std::cout << "  ┌------┬-----------------┬---------┬------------┐" << std::endl;

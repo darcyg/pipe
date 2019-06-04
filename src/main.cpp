@@ -43,8 +43,14 @@ int main(int argc, char** argv)
     app.add_flag("-l,--loc", opt->clOpt.local, "run in localhost");
     app.add_flag("-g,--gen", opt->clOpt.gensjm, "generate sjms, not run tasks");
     app.add_flag("-u,--update", opt->clOpt.update, "update command to execute")->needs(prerun);
+    app.add_flag("-n,--noclean", opt->clOpt.noclean, "not cleanup intermediate files");
     CLI_PARSE(app, argc, argv);
     util::loginfo("parsing arguments finished.", logmtx);
+    std::string cmd = "";
+    for(int i = 0; i < argc; ++i){
+        cmd.append(argv[i] + std::string(1, ' '));
+    }
+    util::loginfo("command: " + cmd, logmtx);
     util::loginfo("preparing output parent directory.", logmtx);
     util::makedir(opt->ioOpt.out_dir);
     util::loginfo("output parent directory prepared.", logmtx);
